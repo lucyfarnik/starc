@@ -1,12 +1,13 @@
 import numpy as np
 from copy import deepcopy
 from distance import RewardDistance, canon
+from coverage_dist import get_state_dist, get_action_dist
 from tests.toy_env import env, reward
 
 # D_s and D_a are arbitrary choices so we'll just go with the ones we defined
 # in distance.canon
-state_dist = canon.get_state_dist(env)
-action_dist = canon.get_action_dist(env)
+state_dist = get_state_dist(env)
+action_dist = get_action_dist(env)
 
 def test_state_dist():
   assert state_dist.sum() == 1
