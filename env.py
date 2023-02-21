@@ -20,7 +20,21 @@ class Env():
 
 class RandomEnv(Env):
   def __init__(self, n_s: int = 128, n_a: int = 16, discount: int = 0.9):
-    init_dist = softmax(np.random.randn(n_s))
-    transition_dist = softmax(np.random.randn(n_s, n_a, n_s))
-    # IDEA: sample Gaussian, let the N highest values remain, 0 out the rest, then softmax
+    # we get the distributions by sampling a Gaussian,
+    # only keeping the largest values and setting the rest to 0,
+    # and then softmaxing the result
+
+    # TODO we currently pick the largest values as being 1.8sigma above mean
+    # this means that if we have larger n_s we'll be picking more values
+    # at this stage which will make transitions more uniform again
+    init_dist = np.random.randn(n_s)
+    init_dist = np.where(init_dist > 1.8,
+                         init_dist, np.zeros_like(init_dist)-20)
+    init_dist = softmax(init_dist)
+
+    transition_dist = np.random.randn(n_s, n_a, n_s)
+    transition_dist = np.where(transition_dist > 1.8,
+                         transition_dist, np.zeros_like(transition_dist)-20)
+    transition_dist = softmax(transition_dist)
+
     super().__init__(n_s, n_a, discount, init_dist, transition_dist)
