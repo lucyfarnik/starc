@@ -7,6 +7,8 @@ results = None
 with open('results.json', 'r') as f:
   results = json.load(f)[0]
 
+flat = [i for r in results for i in r]
+
 x_axis = np.arange(len(results[0]))
 
 fig, ax = plt.subplots(ncols=3)

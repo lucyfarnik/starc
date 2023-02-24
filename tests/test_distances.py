@@ -22,26 +22,33 @@ def test_action_dist():
 # (this is really slow for big envs which is the real EPIC function we use
 # is a lot more efficient, but this is easier to verify so good for testing)
 def slow_epic(r: Reward, e: Env):
-  expected_shaped = deepcopy(r)
+  state_dist = get_state_dist(e)
+  action_dist = get_action_dist(e)
 
-  for s, s_vals in enumerate(r):
-    for a, a_vals in enumerate(s_vals):
-      for s_prime, _ in enumerate(a_vals):
+  term1 = np.zeros((1, 1, e.n_s))
+  for s_prime in range(e.n_s):
+    for A, A_prob in enumerate(action_dist):
+      for S_prime, S_prime_prob in enumerate(state_dist):
+        prob = A_prob * S_prime_prob
+        term1[0, 0, s_prime] += prob * (
+          e.discount * r[s_prime, A, S_prime]
+        ) 
 
-        expectation = 0
-        for S, S_prob in enumerate(state_dist):
-          for A, A_prob in enumerate(action_dist):
-            for S_prime, S_prime_prob in enumerate(state_dist):
-              prob = S_prob * A_prob * S_prime_prob
-              expectation += prob * (
-                e.discount * r[s_prime, A, S_prime] -
-                r[s, A, S_prime] -
-                e.discount * r[S, A, S_prime]
-              )
+  term2 = np.zeros((e.n_s, 1, 1))
+  for s in range(e.n_s):
+    for A, A_prob in enumerate(action_dist):
+      for S_prime, S_prime_prob in enumerate(state_dist):
+        prob = A_prob * S_prime_prob
+        term2[s, 0, 0] += prob * r[s, A, S_prime]
 
-        expected_shaped[s, a, s_prime] += expectation
+  term3 = 0
+  for S, S_prob in enumerate(state_dist):
+    for A, A_prob in enumerate(action_dist):
+      for S_prime, S_prime_prob in enumerate(state_dist):
+        prob = S_prob * A_prob * S_prime_prob
+        term3 += prob * e.discount * r[S, A, S_prime]
 
-  return expected_shaped
+  return r + term1 - term2 - term3
 
 def test_epic_canon_toy():
   expected_shaped = slow_epic(reward, env)
