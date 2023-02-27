@@ -1,5 +1,5 @@
 # work in progress
-import numpy as np
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import json
 
@@ -11,7 +11,7 @@ num_envs = len(results)
 num_rs = len(results[0])
 num_interp_steps = len(results[0][0])
 
-x_axis = np.arange(num_interp_steps)
+x_axis = jnp.arange(num_interp_steps)
 keys = results[0][0][0].keys()
 
 fig, ax = plt.subplots(nrows=num_envs, ncols=num_rs)

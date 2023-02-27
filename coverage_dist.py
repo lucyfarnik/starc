@@ -1,7 +1,7 @@
 # D_s and D_a in the EPIC and DARD papers
 #? Is there a better setting for these?
 # In theory the best way is to make this correspond to spread among all policies
-import numpy as np
+import jax.numpy as jnp
 from env import Env
 
 # TODO
@@ -9,10 +9,10 @@ from env import Env
 # to let you swap these around
 
 def get_state_dist(env: Env): # prob of transitioning into state
-  return np.ones(env.n_s) / env.n_s
+  return jnp.ones(env.n_s) / env.n_s
   # logits = env.transition_dist.sum(axis=(0, 1))
   # sum = logits.sum()
   # return logits / sum
 
 def get_action_dist(env: Env): # right now this is just uniform
-  return np.ones(env.n_a) / env.n_a
+  return jnp.ones(env.n_a) / env.n_a

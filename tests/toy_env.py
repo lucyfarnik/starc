@@ -1,4 +1,4 @@
-import numpy as np
+import jax.numpy as jnp
 from env import Env
 
 # for the tests we'll use n_s=2, n_a=2, with deterministic transitions and rewards
@@ -11,8 +11,8 @@ from env import Env
 n_s = 2
 n_a = 2
 discount = 0.9
-init_dist = np.array([0.5, 0.5])
-transition_dist = np.array([
+init_dist = jnp.array([0.5, 0.5])
+transition_dist = jnp.array([
   [ # s=0
     [ # a=0
       1.0, # s_next = 0
@@ -36,10 +36,10 @@ transition_dist = np.array([
 ])
 env = Env(n_s, n_a, discount, init_dist, transition_dist)
 
-reward = np.zeros((n_s, n_a, n_s))
-reward[0, 1, 1] = 1.0
+reward = jnp.zeros((n_s, n_a, n_s))
+reward = reward.at[0, 1, 1].set(1.0)
 
-expected_q_vals = np.array([
+expected_q_vals = jnp.array([
   [ # s=0
     discount / (1-discount**2),
     1 / (1-discount**2),

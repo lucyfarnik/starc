@@ -1,31 +1,38 @@
 import numpy as np
+from jax import jit
+import jax.numpy as jnp
+from jax import random
 from env import Env
 from _types import Reward, Policy
 
 # TODO fine tune to make it faster - is the max_iters right? maybe add a convergence return condition?
 def optimize(
-  env: Env, reward: Reward,
+  env: Env, reward: Reward, rand_key: random.KeyArray,
   max_iters=10000,
   epsilon=0.1,
   episode_len=100,
   learning_rate=1e-3,
-) -> Policy:
+) -> tuple[Policy, random.KeyArray]:
   q_vals = np.zeros((env.n_s, env.n_a))
 
   for i in range(max_iters):
     # reset the episode every now and then so it doesn't get stuck
     if i % episode_len == 0:
-      s = np.random.choice(env.states, p=env.init_dist)
+      rand_key, subkey = random.split(rand_key)
+      s = random.choice(subkey, env.states, p=env.init_dist)
 
     # behavior policy = epsilon-greedy
-    if np.random.random() > epsilon:
+    rand_key, subkey = random.split(rand_key)
+    if random.uniform(subkey) > epsilon:
       # a = np.random.choice(env.actions, p=softmax(q_vals[s]))
       a = q_vals[s].argmax()
     else:
-      a = np.random.choice(env.actions)
+      rand_key, subkey = random.split(rand_key)
+      a = random.choice(subkey, env.actions)
 
     # sample next state
-    s_next = np.random.choice(env.states, p=env.transition_dist[s, a])
+    rand_key, subkey = random.split(rand_key)
+    s_next = random.choice(subkey, env.states, p=env.transition_dist[s, a])
     r = reward[s, a, s_next]
 
     # compute TD error and update Q value
@@ -35,22 +42,24 @@ def optimize(
     # the next state becomes the current state
     s = s_next
 
-  return q_vals.argmax(axis=-1)
+  return jnp.array(q_vals.argmax(axis=-1))
+optimize = jit(optimize)
 
 # Monte Carlo estimation
 # TODO this still has pretty high variance, having a static number of episodes and steps probably isn't ideal
 # TODO add option to pass in multiple rewards
 def policy_return(
-  reward: Reward, policy: Policy, env: Env,
+  reward: Reward, policy: Policy, env: Env, rand_key: random.KeyArray,
   num_episodes=10,
   steps_per_episode=1000,
   compute_return_per_steps=10, # number of timesteps between return samples - see comment below
-) -> float:
+) -> tuple[float, random.KeyArray]:
   return_vals = []
 
   for _ in range(num_episodes):
     # init state
-    s = np.random.choice(env.states, p=env.init_dist)
+    rand_key, subkey = random.split(rand_key)
+    s = random.choice(subkey, env.states, p=env.init_dist)
     episode_rewards = []
 
     for _ in range(steps_per_episode):
@@ -59,7 +68,8 @@ def policy_return(
       a = policy[s]
 
       # next state
-      s_next = np.random.choice(env.states, p=env.transition_dist[s, a])
+      rand_key, subkey = random.split(rand_key)
+      s_next = random.choice(subkey, env.states, p=env.transition_dist[s, a])
       episode_rewards.append(reward[s, a, s_next])
       s = s_next
     
@@ -82,3 +92,4 @@ def policy_return(
       return_vals.append(return_val)
 
   return sum(return_vals) / len(return_vals)
+policy_return = jit(policy_return)

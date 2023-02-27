@@ -1,4 +1,4 @@
-import numpy as np
+from jax import jit
 from einops import rearrange
 from env import Env
 from _types import Reward
@@ -18,7 +18,9 @@ def epic_canon(reward: Reward, env: Env) -> Reward:
   term3 = env.discount * (reward * S * A * S_prime).sum()
 
   return reward + term1 - term2 - term3
+epic_canon = jit(epic_canon)
 
+# TODO: the complexity here is O(s^4a); at the current env size that's 4B elements
 def dard_canon(reward: Reward, env: Env) -> Reward:
   A = get_action_dist(env)
 
@@ -37,6 +39,7 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
   term3 = env.discount * r_given_probs.sum(axis=(2,3,4))[:,None,:]
   
   return reward + term1 - term2 - term3
+dard_canon = jit(dard_canon)
 
 canon_funcs = {
   'EPIC': epic_canon,
