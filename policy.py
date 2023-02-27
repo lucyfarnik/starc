@@ -2,6 +2,7 @@ import numpy as np
 from env import Env
 from _types import Reward, Policy
 
+# TODO fine tune to make it faster - is the max_iters right? maybe add a convergence return condition?
 def optimize(
   env: Env, reward: Reward,
   max_iters=10000,
@@ -37,6 +38,8 @@ def optimize(
   return q_vals.argmax(axis=-1)
 
 # Monte Carlo estimation
+# TODO this still has pretty high variance, having a static number of episodes and steps probably isn't ideal
+# TODO add option to pass in multiple rewards
 def policy_return(
   reward: Reward, policy: Policy, env: Env,
   num_episodes=10,

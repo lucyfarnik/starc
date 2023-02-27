@@ -12,8 +12,7 @@ interpolation_steps = 64
 
 distances = {}
 # add all mixes of norms for norm and dist functions, instantiate distances for them
-#! canon_opts = ['EPIC', 'DARD']
-canon_opts = ['EPIC']
+canon_opts = ['EPIC', 'DARD']
 norm_opts = [1, 2, float('inf')]
 for c in canon_opts:
   for n in norm_opts:

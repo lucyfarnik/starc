@@ -1,4 +1,5 @@
 import numpy as np
+from einops import rearrange
 from env import Env
 from _types import Reward
 from coverage_dist import get_state_dist, get_action_dist
@@ -18,36 +19,24 @@ def epic_canon(reward: Reward, env: Env) -> Reward:
 
   return reward + term1 - term2 - term3
 
-
-#! DOESN'T WORK - FIXING IT IN ___dard_fuckery.ipynb
-# taken from the file Joar sent over
-def gradient(potential: np.ndarray, env: Env) -> np.ndarray:
-  return env.discount * potential[None, None, :] - potential[:, None, None]
-
 def dard_canon(reward: Reward, env: Env) -> Reward:
-  # weights = (
-  #   env.state_dist[:, None, None] *
-  #   env.action_dist[None, :, None] *
-  #   env.state_dist[None, None, :]
-  # )
-  # weighted_r = reward * weights
-  weighted_r = env.transition_dist * reward
-  outflow = weighted_r.sum((-2, -1))
-  potential = outflow / get_state_dist(env)
-  joint_state_probs = env.transition_dist.sum(axis=1)
-  next_state_probs = joint_state_probs / joint_state_probs.sum(
-      axis=1, keepdims=True
+  A = get_action_dist(env)
+
+  potential = (env.transition_dist * reward).sum(axis=2)
+  potential = (potential * A[None, :]).sum(axis=1)
+
+  term1 = env.discount * potential[None, None, :]
+  term2 = potential[:, None, None]
+  
+  joint_probs = ( # [s, s', S', A, S'']; p(S', S'' | s, s', A=A)
+    A[None, None, None, :, None] * 
+    rearrange(env.transition_dist, 's A Sp -> s 1 Sp A 1') *
+    rearrange(env.transition_dist, 'sp A Sd -> 1 sp 1 A Sd')
   )
-  action_probs = get_action_dist(env)
-  offset = (
-      reward[None, :, :, None, :]
-      * next_state_probs[:, :, None, None, None]
-      * action_probs[None, None, :, None, None]
-      * next_state_probs[None, None, None, :, :]
-  ).sum(axis=(1, 2, 4))
-
-  return reward + gradient(potential, env) - env.discount * offset[:, None, :]
-
+  r_given_probs = reward[None, None, ...] * joint_probs
+  term3 = env.discount * r_given_probs.sum(axis=(2,3,4))[:,None,:]
+  
+  return reward + term1 - term2 - term3
 
 canon_funcs = {
   'EPIC': epic_canon,

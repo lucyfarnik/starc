@@ -63,26 +63,32 @@ def test_epic_canon():
   assert np.isclose(output, expected).all()
 
 def slow_dard(r: Reward, e: Env):
-  expected_shaped = deepcopy(r)
+  action_dist = get_action_dist(e)
 
-  for s, s_vals in enumerate(r):
-    for a, a_vals in enumerate(s_vals):
-      for s_prime, _ in enumerate(a_vals):
-
-        expectation = 0
-        for A, A_prob in enumerate(action_dist):
-          for S_prime, S_prime_prob in enumerate(e.transition_dist[s, A]):
-            for S_double, S_double_prob in enumerate(e.transition_dist[s_prime, A]):
-              prob = A_prob * S_prime_prob * S_double_prob
-              expectation += prob * (
-                e.discount * r[s_prime, A, S_double] -
-                r[s, A, S_prime] -
-                e.discount * r[S_prime, A, S_double]
-              )
-
-        expected_shaped[s, a, s_prime] += expectation
-      
-  return expected_shaped
+  term1 = np.zeros((1, 1, e.n_s))
+  for s_prime in range(e.n_s):
+    for A, A_prob in enumerate(action_dist):
+      for S_double, S_double_prob in enumerate(e.transition_dist[s_prime, A, :]):
+        prob = A_prob * S_double_prob
+        term1[0, 0, s_prime] += prob * e.discount * r[s_prime, A, S_double]
+  
+  term2 = np.zeros((e.n_s, 1, 1))
+  for s in range(e.n_s):
+    for A, A_prob in enumerate(action_dist):
+      for S_prime, S_prime_prob in enumerate(e.transition_dist[s, A, :]):
+        prob = A_prob * S_prime_prob
+        term2[s, 0, 0] += prob * r[s, A, S_prime]
+  
+  term3 = np.zeros((e.n_s, 1, e.n_s))
+  for s in range(e.n_s):
+    for s_prime in range(e.n_s):
+      for A, A_prob in enumerate(action_dist):
+        for S_prime, S_prime_prob in enumerate(e.transition_dist[s, A, :]):
+          for S_double, S_double_prob in enumerate(e.transition_dist[s_prime, A, :]):
+            prob = A_prob * S_prime_prob * S_double_prob
+            term3[s, 0, s_prime] += prob * e.discount * r[S_prime, A, S_double]
+  
+  return r + term1 - term2 - term3
 
 def test_dard_canon_toy():
   expected_shaped = slow_dard(reward, env) 
