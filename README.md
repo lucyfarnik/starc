@@ -17,6 +17,7 @@ they may be useful once again which is why we keep them around.
 
 ## How to run
 Run `python __main__.py` to actually run the experiments, for tests run `pytest`.
+For showing you the current generation of charts, run `python charts.py`.
 
 ## Help
 If you have any questions, please get in touch with me. If something in this
