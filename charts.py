@@ -5,19 +5,26 @@ import json
 
 results = None
 with open('results.json', 'r') as f:
-  results = json.load(f)[0]
+  results = json.load(f)
 
-flat = [i for r in results for i in r]
+num_envs = len(results)
+num_rs = len(results[0])
+num_interp_steps = len(results[0][0])
 
-x_axis = np.arange(len(results[0]))
+x_axis = np.arange(num_interp_steps)
+keys = results[0][0][0].keys()
 
-fig, ax = plt.subplots(ncols=3)
-for i, result in enumerate(results):
-  for key in result[0].keys():
-    if 'regret' in key or key == 'EPIC-infty-1' or key == 'EPIC-2-1':
-      continue
-    ax[i].plot(x_axis, [r[key] for r in result], label=key)
-  ax[i].legend()
+fig, ax = plt.subplots(nrows=num_envs, ncols=num_rs)
+for env_i, env_data in enumerate(results):
+  for r_i, r_data in enumerate(env_data):
+    for key in keys:
+      ax[env_i][r_i].scatter(x_axis, [r[key] for r in r_data],
+                             label=key, marker='.')
+    ax[env_i][r_i].set_yscale('log')
+
+fig.legend(keys)
+fig.supxlabel('Reward samples')
+fig.supylabel('Environment samples')
 
 plt.show()
 

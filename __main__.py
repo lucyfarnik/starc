@@ -6,13 +6,13 @@ from distance import RewardDistance
 from env import RandomEnv
 
 # hyperparams
-num_trials = 1
-num_samples = 3
-interpolation_steps = 10
+num_trials = 4
+num_samples = 4
+interpolation_steps = 64
 
 distances = {}
 # add all mixes of norms for norm and dist functions, instantiate distances for them
-# canon_opts = ['EPIC', 'DARD']
+#! canon_opts = ['EPIC', 'DARD']
 canon_opts = ['EPIC']
 norm_opts = [1, 2, float('inf')]
 for c in canon_opts:
@@ -50,6 +50,7 @@ for trial_i in range(num_trials): # each trial comes with its own environment
       pi_y = optimize(env, -r_i) # worst policy under R_i
 
       # compute return values
+      # TODO: optimize this to avoid duplicate calculation (change the func to allow multiple reward functions)
       J_1_pi_1 = policy_return(r1, pi_1, env)
       J_1_pi_i = policy_return(r1, pi_i, env)
       J_1_pi_x = policy_return(r1, pi_x, env)
