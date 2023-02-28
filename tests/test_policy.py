@@ -1,5 +1,5 @@
 import numpy as np
-from policy import optimize, policy_returns
+from policy import optimize, policy_returns, policy_return
 from tests.toy_env import env, reward, expected_policy, expected_q_vals
 
 def test_optimize():
@@ -16,3 +16,8 @@ def test_policy_returns():
   out1, out2 = policy_returns([reward, reward], expected_policy, env)
   assert abs(out1 - expected_return) < 0.25
   assert abs(out2 - expected_return) < 0.25
+
+def test_policy_return_wrapper():
+  expected_return = expected_q_vals[:, expected_policy].mean()
+  output = policy_return(reward, expected_policy, env)
+  assert abs(output - expected_return) < 0.25

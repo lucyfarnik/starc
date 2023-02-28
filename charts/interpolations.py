@@ -1,10 +1,9 @@
-# work in progress
 import numpy as np
 import matplotlib.pyplot as plt
 import json
 
 results = None
-with open('results.json', 'r') as f:
+with open('results/3_added_none.json', 'r') as f:
   results = json.load(f)
 
 num_envs = len(results)

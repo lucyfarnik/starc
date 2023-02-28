@@ -4,7 +4,8 @@ from _types import Reward, Policy
 
 # TODO fine tune to make it faster - is the max_iters right? maybe add a convergence return condition?
 def optimize(
-  env: Env, reward: Reward,
+  env: Env,
+  reward: Reward,
   max_iters=10000,
   epsilon=0.1,
   episode_len=100,
@@ -39,12 +40,11 @@ def optimize(
 
 # Monte Carlo estimation
 # TODO this still has pretty high variance, having a static number of episodes and steps probably isn't ideal
-# TODO add option to pass in multiple rewards
 def policy_returns(
   rewards: list[Reward],
   policy: Policy,
   env: Env,
-  num_episodes=10,
+  num_episodes=20,
   steps_per_episode=1000,
   compute_return_per_steps=10, # number of timesteps between return samples - see comment below
 ) -> list[float]:
@@ -89,3 +89,7 @@ def policy_returns(
         return_vals[r_i].append(return_val)
 
   return [sum(rs) / len(rs) for rs in return_vals]
+
+# wrapper for the function above - takes just one reward function
+def policy_return(reward: Reward, *args) -> Reward:
+  return policy_returns([reward], *args)[0]
