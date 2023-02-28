@@ -39,9 +39,26 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
   return reward + term1 - term2 - term3
 
 canon_funcs = {
+  'None': lambda r, _: r,
   'EPIC': epic_canon,
   'DARD': dard_canon,
 }
 
 #! The divergence-free canon is prob gonna be solvable with torch.optim
 # https://openreview.net/pdf?id=Hn21kZHiCK section 6 "minimal canonicalization c"
+
+# computes either the norm, or returns 1 if ord==0
+# which makes it useful in defining canon_and_norm (where norm==0 means don't normalize)
+def norm_wrapper(reward: Reward, ord: int|float) -> float:
+  if ord == 0:
+    return 1
+  return np.linalg.norm(reward.flatten(), ord)
+
+norm_opts = [1, 2, float('inf'), 0]
+# returns a dictionary of all the possible canonicalizations and normalizations
+def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
+  can = {c_name: c_func(reward, env) for c_name, c_func in canon_funcs.items()}
+  norm = {f'{c_name}-{n_ord}': val / norm_wrapper(val, n_ord)
+            for n_ord in norm_opts
+            for c_name, val in can.items()}
+  return norm

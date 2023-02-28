@@ -1,6 +1,5 @@
 import numpy as np
-from copy import deepcopy
-from distance import RewardDistance, canon
+from canon import epic_canon, dard_canon, norm_wrapper, canon_and_norm
 from env import Env, RandomEnv
 from coverage_dist import get_state_dist, get_action_dist
 from reward import random_reward
@@ -52,14 +51,14 @@ def slow_epic(r: Reward, e: Env):
 
 def test_epic_canon_toy():
   expected_shaped = slow_epic(reward, env)
-  output = canon.epic_canon(reward, env)
+  output = epic_canon(reward, env)
   assert np.isclose(output, expected_shaped).all()
 
 def test_epic_canon():
   e = RandomEnv(n_s=16, n_a=4)
   r = random_reward(e)
   expected = slow_epic(r, e)
-  output = canon.epic_canon(r, e)
+  output = epic_canon(r, e)
   assert np.isclose(output, expected).all()
 
 def slow_dard(r: Reward, e: Env):
@@ -92,14 +91,14 @@ def slow_dard(r: Reward, e: Env):
 
 def test_dard_canon_toy():
   expected_shaped = slow_dard(reward, env) 
-  output = canon.dard_canon(reward, env)
+  output = dard_canon(reward, env)
   assert np.isclose(output, expected_shaped).all()
 
 def test_dard_canon():
   e = RandomEnv(n_s=16, n_a=4)
   r = random_reward(e)
   expected = slow_dard(r, e)
-  output = canon.dard_canon(r, e)
+  output = dard_canon(r, e)
   assert np.isclose(output, expected).all()
 
 # this is just a sanity check to make sure the numpy function does what
@@ -110,12 +109,29 @@ def test_norms():
   assert np.linalg.norm(test_in, 2) - 3.741657 < 1e-5
   assert np.linalg.norm(test_in, float('inf')) == 3
 
-def test_distance():
+def test_norm_wrapper():
+  test_in = np.array([1, 2, 3])
+  assert norm_wrapper(test_in, 1) == 6
+  assert norm_wrapper(test_in, 0) == 1
+
+def test_canon_and_norm():
   e = RandomEnv(n_s=16, n_a=4)
-  r1, r2 = random_reward(e), random_reward(e)
-  exp_can1, exp_can2 = slow_epic(r1, e), slow_epic(r2, e)
-  stand1 = exp_can1 / np.linalg.norm(exp_can1.flatten(), 2)
-  stand2 = exp_can2 / np.linalg.norm(exp_can2.flatten(), 2)
-  exp = np.linalg.norm((stand1 - stand2).flatten(), 2)
-  out = RewardDistance('EPIC', 2, 2)(r1, r2, e)
-  assert np.isclose(exp, out).all()
+  r = random_reward(e)
+  r_epic = slow_epic(r, e)
+  r_dard = slow_dard(r, e)
+
+  expected = {}
+  expected['None-0'] = r
+  expected['EPIC-0'] = r_epic
+  expected['DARD-0'] = r_dard
+  for n in [1, 2, float('inf')]:
+    expected[f'None-{n}'] = r / np.linalg.norm(r.flatten(), n)
+    expected[f'EPIC-{n}'] = r_epic / np.linalg.norm(r_epic.flatten(), n)
+    expected[f'DARD-{n}'] = r_dard / np.linalg.norm(r_dard.flatten(), n)
+
+  output = canon_and_norm(r, e)
+
+  assert expected.keys() == output.keys()
+  for key, val in expected.items():
+    assert np.isclose(val, output[key]).all()
+    

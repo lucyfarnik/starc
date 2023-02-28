@@ -8,8 +8,8 @@ This repo is meant for my co-authors.
 
 ## How to navigate this clusterfuck of a repo
 As you may have guessed from, like, everything, this is a work in progress.
-All the actual code is either directly in the root directory or in the `distance`
-directory. The `tests` directory, unsurprisingly, contains racoons that will
+All the actual code is directly in the root directory.
+The `tests` directory, unsurprisingly, contains racoons that will
 bite you if you stare at them for too long (and maybe some tests too idk).
 Directories that start with __ (double underscore) are for storing ancient
 scrolls that were useful once upon a time, and when the ravens return to Erebor

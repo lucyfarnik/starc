@@ -27,13 +27,14 @@ class RandomEnv(Env):
     # TODO we currently pick the largest values as being 1.8sigma above mean
     # this means that if we have larger n_s we'll be picking more values
     # at this stage which will make transitions more uniform again
+    thresh = 1 if n_s < 50 else (1.5 if n_s < 100 else 1.8) #! bigly goodn't hacky shit, kinda works for 32, 64, and 128
     init_dist = np.random.randn(n_s)
-    init_dist = np.where(init_dist > 1.8,
+    init_dist = np.where(init_dist > thresh,
                          init_dist, np.zeros_like(init_dist)-20)
     init_dist = softmax(init_dist)
 
     transition_dist = np.random.randn(n_s, n_a, n_s)
-    transition_dist = np.where(transition_dist > 1.8,
+    transition_dist = np.where(transition_dist > thresh,
                          transition_dist, np.zeros_like(transition_dist)-20)
     transition_dist = softmax(transition_dist)
 

@@ -22,6 +22,7 @@ for env_i, env_data in enumerate(results):
                              label=key, marker='.')
     ax[env_i][r_i].set_yscale('log')
 
+fig.suptitle('Added None (no canonicalization) and 0 (no normalization) - n_s=32 n_a=8')
 fig.legend(keys)
 fig.supxlabel('Reward samples')
 fig.supylabel('Environment samples')

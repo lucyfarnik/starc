@@ -40,18 +40,23 @@ def optimize(
 # Monte Carlo estimation
 # TODO this still has pretty high variance, having a static number of episodes and steps probably isn't ideal
 # TODO add option to pass in multiple rewards
-def policy_return(
-  reward: Reward, policy: Policy, env: Env,
+def policy_returns(
+  rewards: list[Reward],
+  policy: Policy,
+  env: Env,
   num_episodes=10,
   steps_per_episode=1000,
   compute_return_per_steps=10, # number of timesteps between return samples - see comment below
-) -> float:
-  return_vals = []
+) -> list[float]:
+  num_rs = len(rewards)
+
+  # 2D array, first dim is different reward funcs, second dim is samples
+  return_vals = [[] for _ in range(num_rs)]
 
   for _ in range(num_episodes):
     # init state
     s = np.random.choice(env.states, p=env.init_dist)
-    episode_rewards = []
+    episode_rewards = [[] for _ in range(num_rs)] # same dims as return_vals
 
     for _ in range(steps_per_episode):
       # # sample action from policy
@@ -60,7 +65,8 @@ def policy_return(
 
       # next state
       s_next = np.random.choice(env.states, p=env.transition_dist[s, a])
-      episode_rewards.append(reward[s, a, s_next])
+      for i, r in enumerate(rewards):
+        episode_rewards[i].append(r[s, a, s_next])
       s = s_next
     
     # at the end we compute the return - we wanna make sure we take into account
@@ -71,14 +77,15 @@ def policy_return(
     # doesn't get cut prematurely by the end of the episode which would
     # drag down the average
     #? a more accurate way to do this would be replace 100 with log_gamma(1e-4)
-    for return_start in range(0, steps_per_episode-100, compute_return_per_steps):
-      return_val = 0 # accumulator for return from return_start
-      for i, r in enumerate(episode_rewards[return_start:]):
-        if i == 0: gamma_i = 1.0
-        else: gamma_i *= env.discount
-        
-        if gamma_i < 1e-4: break # with discounts this heavy it's not worth computing
-        return_val += gamma_i * r
-      return_vals.append(return_val)
+    for r_i, r_values in enumerate(episode_rewards): # for each return func
+      for return_start in range(0, steps_per_episode-100, compute_return_per_steps):
+        return_val = 0 # accumulator for return from return_start
+        for i, r in enumerate(r_values[return_start:]):
+          if i == 0: gamma_i = 1.0
+          else: gamma_i *= env.discount
+          
+          if gamma_i < 1e-4: break # with discounts this heavy it's not worth computing
+          return_val += gamma_i * r
+        return_vals[r_i].append(return_val)
 
-  return sum(return_vals) / len(return_vals)
+  return [sum(rs) / len(rs) for rs in return_vals]
