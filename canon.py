@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from einops import rearrange
 from env import Env
 from _types import Reward
@@ -38,27 +39,43 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
   
   return reward + term1 - term2 - term3
 
+def minimal_canon(reward: Reward, env: Env, norm_ord: int|float) -> Reward:
+  r = torch.tensor(reward)
+  potential = torch.zeros(env.n_s, requires_grad=True)
+  for _ in range(10000): #TODO: fine tune
+    # potential.grad.zero_()
+    r_prime = r + env.discount * potential[None, None, :] - potential[:, None, None]
+    loss = torch.norm(r_prime, norm_ord)
+    loss.backward()
+    with torch.no_grad():
+      potential.sub_(1e-2 * potential.grad)
+    potential.grad.zero_()
+  return r_prime.detach().numpy()
+
 canon_funcs = {
   'None': lambda r, _: r,
   'EPIC': epic_canon,
   'DARD': dard_canon,
+  'Minimal': minimal_canon,
 }
-
-#! The divergence-free canon is prob gonna be solvable with torch.optim
-# https://openreview.net/pdf?id=Hn21kZHiCK section 6 "minimal canonicalization c"
 
 # computes either the norm, or returns 1 if ord==0
 # which makes it useful in defining canon_and_norm (where norm==0 means don't normalize)
 def norm_wrapper(reward: Reward, ord: int|float) -> float:
-  if ord == 0:
-    return 1
+  if ord == 0: return 1
   return np.linalg.norm(reward.flatten(), ord)
 
 norm_opts = [1, 2, float('inf'), 0]
 # returns a dictionary of all the possible canonicalizations and normalizations
 def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
-  can = {c_name: c_func(reward, env) for c_name, c_func in canon_funcs.items()}
+  can = {c_name: canon_funcs[c_name](reward, env)
+         for c_name in ['None', 'EPIC', 'DARD']}
   norm = {f'{c_name}-{n_ord}': val / norm_wrapper(val, n_ord)
             for n_ord in norm_opts
             for c_name, val in can.items()}
+  # add in minimal canon (which depends on the norm order so it needs different code)
+  for n_ord in norm_opts:
+    if n_ord == 0: continue
+    min_can = canon_funcs['Minimal'](reward, env, n_ord)
+    norm[f'Minimal-{n_ord}'] = min_can / norm_wrapper(min_can, n_ord)
   return norm

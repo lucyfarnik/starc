@@ -7,22 +7,21 @@ from policy import optimize, policy_return, policy_returns
 from env import RandomEnv
 
 # hyperparams
-num_trials = 4
-num_samples = 4
+num_envs = 4
+num_rewards = 4
 interpolation_steps = 32
 n_s = 32
-n_a = 8
 
 dist_opts = [1, 2, float('inf')]
 
 # experiment starts here
 results = []
-for trial_i in range(num_trials): # each trial comes with its own environment
+for env_i in range(num_envs): # each trial comes with its own environment
   trail_results = []
-  env = RandomEnv(n_s, n_a)
+  env = RandomEnv(n_s, n_a=np.random.randint(2, 16))
 
-  for sample_i in range(num_samples): # sampling different rewards
-    print(f"Environment {trial_i}, rewards {sample_i}")
+  for reward_i in range(num_rewards): # sampling different rewards
+    print(f"Environment {env_i}, rewards {reward_i}")
     sample_results = []
 
     # generate random rewards

@@ -3,10 +3,11 @@ from env import Env
 from _types import Reward, Policy
 
 # TODO fine tune to make it faster - is the max_iters right? maybe add a convergence return condition?
+# TODO maybe do value iteration? could be faster and we'd actually know for sure we converged
 def optimize(
   env: Env,
   reward: Reward,
-  max_iters=10000,
+  max_iters=50000, # TODO try increasing
   epsilon=0.1,
   episode_len=100,
   learning_rate=1e-3,
@@ -86,7 +87,7 @@ def policy_returns(
           
           if gamma_i < 1e-4: break # with discounts this heavy it's not worth computing
           return_val += gamma_i * r
-        return_vals[r_i].append(return_val)
+        return_vals[r_i].append(return_val) #! Scrap this whole sample-through-episode and avg thing, instead just have a wide init dist
 
   return [sum(rs) / len(rs) for rs in return_vals]
 

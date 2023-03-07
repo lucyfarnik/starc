@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import json
 
 results = None
-with open('results/3_added_none.json', 'r') as f:
+with open('results/4_minimal_diverse_r.json', 'r') as f:
   results = json.load(f)
 
 num_envs = len(results)
@@ -21,7 +21,7 @@ for env_i, env_data in enumerate(results):
                              label=key, marker='.')
     ax[env_i][r_i].set_yscale('log')
 
-fig.suptitle('Added None (no canonicalization) and 0 (no normalization) - n_s=32 n_a=8')
+fig.suptitle('Added minimal canon (untested), increased reward diversity')
 fig.legend(keys)
 fig.supxlabel('Reward samples')
 fig.supylabel('Environment samples')
@@ -30,3 +30,5 @@ plt.show()
 
 # for every env, graph pairs of different measurements between reward functions
 # eg EPIC vs DARD, with a dot for every reward function
+
+# TODO: pairplot everything compared to EPIC

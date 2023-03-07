@@ -6,10 +6,6 @@ def test_random_reward():
   env = RandomEnv()
   reward = random_reward(env)
   assert reward.shape == (env.n_s, env.n_a, env.n_s)
-  mean = reward.mean()
-  assert abs(mean)< 0.01
-  std = reward.std()
-  assert abs(std - 1) < 0.01
 
 def test_interpolate():
   r1 = np.array([

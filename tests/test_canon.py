@@ -115,7 +115,7 @@ def test_norm_wrapper():
   assert norm_wrapper(test_in, 0) == 1
 
 def test_canon_and_norm():
-  e = RandomEnv(n_s=16, n_a=4)
+  e = RandomEnv(n_s=32, n_a=4)
   r = random_reward(e)
   r_epic = slow_epic(r, e)
   r_dard = slow_dard(r, e)
@@ -135,3 +135,4 @@ def test_canon_and_norm():
   for key, val in expected.items():
     assert np.isclose(val, output[key]).all()
     
+# TODO: add testing for minimal_canon
