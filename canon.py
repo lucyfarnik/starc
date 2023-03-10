@@ -4,6 +4,7 @@ from einops import rearrange
 from env import Env
 from _types import Reward
 from coverage_dist import get_state_dist, get_action_dist
+from utils import timed
 
 def epic_canon(reward: Reward, env: Env) -> Reward:
   D_s = get_state_dist(env)
@@ -39,17 +40,19 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
   
   return reward + term1 - term2 - term3
 
+#! Does not converge for norm_ord 1 or inf
+# @timed
 def minimal_canon(reward: Reward, env: Env, norm_ord: int|float) -> Reward:
   r = torch.tensor(reward)
   potential = torch.zeros(env.n_s, requires_grad=True)
-  for _ in range(10000): #TODO: fine tune
-    # potential.grad.zero_()
+  optimizer = torch.optim.Adam([potential])
+  for _ in range(20000):
+    optimizer.zero_grad()
     r_prime = r + env.discount * potential[None, None, :] - potential[:, None, None]
     loss = torch.norm(r_prime, norm_ord)
     loss.backward()
-    with torch.no_grad():
-      potential.sub_(1e-2 * potential.grad)
-    potential.grad.zero_()
+    optimizer.step()
+    if torch.norm(potential.grad, 2) < 1e-4: break
   return r_prime.detach().numpy()
 
 canon_funcs = {

@@ -20,19 +20,14 @@ class Env():
 
 class RandomEnv(Env):
   def __init__(self, n_s: int = 128, n_a: int = 16, discount: int = 0.9):
-    # we get the distributions by sampling a Gaussian,
-    # only keeping the largest values and setting the rest to 0,
-    # and then softmaxing the result
+    # uniform init dist
+    init_dist = np.ones(n_s) / n_s
 
+    # sample iid Gaussians, then only keep the highest values, then softmax -> sparse
     # TODO we currently pick the largest values as being 1.8sigma above mean
     # this means that if we have larger n_s we'll be picking more values
     # at this stage which will make transitions more uniform again
     thresh = 1 if n_s < 50 else (1.5 if n_s < 100 else 1.8) #! bigly goodn't hacky shit, kinda works for 32, 64, and 128
-    init_dist = np.random.randn(n_s) #! Make this uniform or uniform-ish
-    init_dist = np.where(init_dist > thresh,
-                         init_dist, np.zeros_like(init_dist)-20)
-    init_dist = softmax(init_dist)
-
     transition_dist = np.random.randn(n_s, n_a, n_s)
     transition_dist = np.where(transition_dist > thresh,
                          transition_dist, np.zeros_like(transition_dist)-20)
