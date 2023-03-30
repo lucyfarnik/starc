@@ -4,6 +4,7 @@ from env import Env
 from _types import Reward
 
 # maybe also have different Gaussian means for different states? move all up or down etc
+# sparse can be a boolean, or None which means we randomly decide
 def random_reward(env: Env, sparse: Optional[bool] = None) -> Reward:
   r = np.random.randn(env.n_s, env.n_a, env.n_s) # iid Gaussian
   if sparse is True or (sparse is None and np.random.random() > 0.8): # make it sparse sometimes
@@ -19,29 +20,6 @@ def random_reward(env: Env, sparse: Optional[bool] = None) -> Reward:
     potential += np.random.random() # move up or down
     r += env.discount * potential[None, None, :] - potential[:, None, None]
   return r
-
-def sparse_reward(env: Type[Env]) -> Reward:
-    r = np.random.randn(env.n_s, env.n_a, env.n_s)
-    thresh = 3 if env.n_s < 50 else (3.5 if env.n_s < 100 else 3.8)
-    r = np.where(r > thresh, r, np.zeros_like(r))
-    r *= 10 * np.random.random()
-    r += 10 * np.random.random()
-    potential = np.random.randn(env.n_s)
-    potential *= 10 * np.random.random()
-    potential += np.random.random()
-    r += env.discount * potential[None, None, :] - potential[:, None, None]
-    return r
-
-def dense_reward(env: Type[Env]) -> Reward:
-    r = np.random.randn(env.n_s, env.n_a, env.n_s)
-    r *= 10 * np.random.random()
-    r += 10 * np.random.random()
-    potential = np.random.randn(env.n_s)
-    potential *= 10 * np.random.random()
-    potential += np.random.random()
-    r += env.discount * potential[None, None, :] - potential[:, None, None]
-    return r
-
 
 # return a list of rewards between r1 and r2
 # the interpolation is logarithmic rather than linear (that way there's more
