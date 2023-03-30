@@ -1,11 +1,12 @@
 import numpy as np
+from typing import Optional
 from env import Env
 from _types import Reward
 
 # maybe also have different Gaussian means for different states? move all up or down etc
-def random_reward(env: Env) -> Reward:
+def random_reward(env: Env, sparse: Optional[bool] = None) -> Reward:
   r = np.random.randn(env.n_s, env.n_a, env.n_s) # iid Gaussian
-  if np.random.random() > 0.8: # make it sparse sometimes
+  if sparse is True or (sparse is None and np.random.random() > 0.8): # make it sparse sometimes
     thresh = 3 if env.n_s < 50 else (3.5 if env.n_s < 100 else 3.8) #! bigly goodn't hacky shit, kinda works for 32, 64, and 128
     r = np.where(r > thresh, r, np.zeros_like(r))
   if np.random.random() > 0.3: # scale it most of the time

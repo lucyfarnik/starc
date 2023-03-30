@@ -9,6 +9,8 @@ from utils import timed
 def epic_canon(reward: Reward, env: Env) -> Reward:
   D_s = get_state_dist(env)
   D_a = get_action_dist(env)
+  if type(reward) is torch.Tensor:
+    D_s, D_a = torch.tensor(D_s), torch.tensor(D_a)
   S = D_s[:, None, None]
   A = D_a[None, :, None]
   S_prime = D_s[None, None, :]
