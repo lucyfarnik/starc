@@ -21,6 +21,29 @@ def random_reward(env: Env, sparse: Optional[bool] = None) -> Reward:
     r += env.discount * potential[None, None, :] - potential[:, None, None]
   return r
 
+def sparse_reward(env: Env) -> Reward:
+    r = np.random.randn(env.n_s, env.n_a, env.n_s)
+    thresh = 3 if env.n_s < 50 else (3.5 if env.n_s < 100 else 3.8)
+    r = np.where(r > thresh, r, np.zeros_like(r))
+    r *= 10 * np.random.random()
+    r += 10 * np.random.random()
+    potential = np.random.randn(env.n_s)
+    potential *= 10 * np.random.random()
+    potential += np.random.random()
+    r += env.discount * potential[None, None, :] - potential[:, None, None]
+    return r
+
+def dense_reward(env: Env) -> Reward:
+    r = np.random.randn(env.n_s, env.n_a, env.n_s)
+    r *= 10 * np.random.random()
+    r += 10 * np.random.random()
+    potential = np.random.randn(env.n_s)
+    potential *= 10 * np.random.random()
+    potential += np.random.random()
+    r += env.discount * potential[None, None, :] - potential[:, None, None]
+    return r
+
+
 # return a list of rewards between r1 and r2
 # the interpolation is logarithmic rather than linear (that way there's more
 # steps closer to r1)
