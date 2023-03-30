@@ -44,7 +44,7 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
 
 #! Does not converge for norm_ord 1 or inf
 # @timed
-def minimal_canon(reward: Reward, env: Env, norm_ord: int|float) -> Reward:
+def minimal_canon(reward: Reward, env: Env, norm_ord: int) -> Reward:
   r = torch.tensor(reward)
   potential = torch.zeros(env.n_s, requires_grad=True)
   optimizer = torch.optim.Adam([potential])
@@ -66,7 +66,7 @@ canon_funcs = {
 
 # computes either the norm, or returns 1 if ord==0
 # which makes it useful in defining canon_and_norm (where norm==0 means don't normalize)
-def norm_wrapper(reward: Reward, ord: int|float) -> float:
+def norm_wrapper(reward: Reward, ord: int) -> float:
   if ord == 0: return 1
   return np.linalg.norm(reward.flatten(), ord)
 

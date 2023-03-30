@@ -21,7 +21,7 @@ def random_reward(env: Env, sparse: Optional[bool] = None) -> Reward:
     r += env.discount * potential[None, None, :] - potential[:, None, None]
   return r
 
-def sparse_reward(env: Type[Env]) -> Reward:
+def sparse_reward(env: Env) -> Reward:
     r = np.random.randn(env.n_s, env.n_a, env.n_s)
     thresh = 3 if env.n_s < 50 else (3.5 if env.n_s < 100 else 3.8)
     r = np.where(r > thresh, r, np.zeros_like(r))
@@ -33,7 +33,7 @@ def sparse_reward(env: Type[Env]) -> Reward:
     r += env.discount * potential[None, None, :] - potential[:, None, None]
     return r
 
-def dense_reward(env: Type[Env]) -> Reward:
+def dense_reward(env: Env) -> Reward:
     r = np.random.randn(env.n_s, env.n_a, env.n_s)
     r *= 10 * np.random.random()
     r += 10 * np.random.random()
