@@ -5,10 +5,28 @@ from _types import Reward
 
 # maybe also have different Gaussian means for different states? move all up or down etc
 # sparse can be a boolean, or None which means we randomly decide
-def random_reward(env: Env, sparse: Optional[bool] = None) -> Reward:
-  r = np.random.randn(env.n_s, env.n_a, env.n_s) # iid Gaussian
+def random_reward(env: Env,
+                  sparse: Optional[bool] = None,
+                  state_dependent: bool = False) -> Reward:
+  """
+    Create a random reward function.
+    env: the environment
+    sparse: whether the reward function should be sparse (ie all but around 3 are zero)
+    state_dependent: whether the reward should depend exclusive on the state
+      (rather than the transition)
+  """
+  if state_dependent:
+    state_r = np.random.randn(env.n_s)
+    r = np.zeros((env.n_s, env.n_a, env.n_s))
+    for s in range(env.n_s):
+      r[:, :, s] = state_r[s]
+  else:
+    r = np.random.randn(env.n_s, env.n_a, env.n_s) # iid Gaussian
   if sparse is True or (sparse is None and np.random.random() > 0.8): # make it sparse sometimes
-    thresh = 3 if env.n_s < 50 else (3.5 if env.n_s < 100 else 3.8) #! bigly goodn't hacky shit, kinda works for 32, 64, and 128
+    # determine the threshold to use for sparseness
+    #! bigly goodn't hacky shit, kinda works for 32, 64, and 128
+    thresh = 3 if env.n_s < 50 else (3.5 if env.n_s < 100 else 3.8)
+    if state_dependent: thresh -= 2 # if it's state dependent then there's only n_s unique vals
     r = np.where(r > thresh, r, np.zeros_like(r))
   if np.random.random() > 0.3: # scale it most of the time
     r *= 10 * np.random.random()
