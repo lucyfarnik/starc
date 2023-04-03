@@ -10,9 +10,9 @@ from distance_funcs import epic, epic_torch
 from shaping import shaped_distance, maximal_transition_dist
 
 # hyperparams
-num_envs = 8
-num_rewards = 8
-interpolation_steps = 8
+num_envs = 4
+num_rewards = 4
+interpolation_steps = 4
 n_s = 64
 n_a = 8
 sparse_rs = False

@@ -6,26 +6,42 @@ from canon import canon_and_norm
 from policy import optimize, policy_return, policy_returns
 from env import RandomEnv
 
-# hyperparams
-num_envs = 4
-num_rewards = 4
-interpolation_steps = 32
-n_s = 32
+config = {
+  # hyperparams
+  'num_envs': 4,
+  'num_rewards': 4,
+  'interpolation_steps': 16,
+  'n_s': 32,
+  'n_a': 4,
+
+  # env and reward settings
+  'episodic': False,
+  'discount': 0.99,
+  'sparse': False,
+  'state_dependent': False,
+  'reward_only_in_terminal': False,
+}
+results_path = 'results/high_discount_results.json'
 
 dist_opts = [1, 2, float('inf')]
 
 # experiment starts here
+# TODO look at different specific envs and rewards (eg both sparse)
+# TODO try to check if things get more/less correlated when we change the discount factor
 results = []
-for env_i in range(num_envs): # each trial comes with its own environment
+for env_i in range(config['num_envs']): # each trial comes with its own environment
   trail_results = []
-  env = RandomEnv(n_s, n_a=np.random.randint(2, 16))
+  env = RandomEnv(config['n_s'], config['n_a'], config['discount'], config['episodic'])
 
-  for reward_i in range(num_rewards): # sampling different rewards
+  for reward_i in range(config['num_rewards']): # sampling different rewards
     print(f"Environment {env_i}, rewards {reward_i}")
     sample_results = []
 
     # generate random rewards
-    r1, r2 = random_reward(env), random_reward(env)
+    r1 = random_reward(env, config['sparse'], config['state_dependent'],
+                       config['reward_only_in_terminal'])
+    r2 = random_reward(env, config['sparse'], config['state_dependent'],
+                       config['reward_only_in_terminal'])
 
     # policies for R1
     pi_1 = optimize(env, r1) # best policy under R1
@@ -39,7 +55,7 @@ for env_i in range(num_envs): # each trial comes with its own environment
     can1 = canon_and_norm(r1, env)
 
     # interpolate between R1 and R2
-    for r_i in interpolate(r1, r2, interpolation_steps):
+    for r_i in interpolate(r1, r2, config['interpolation_steps']):
       interp_results = {}
 
       # canonicalizations and normalizations of R_i
@@ -61,8 +77,6 @@ for env_i in range(num_envs): # each trial comes with its own environment
       J_i_pi_1 = policy_return(r_i, pi_1, env)
       J_1_pi_i, J_i_pi_i = policy_returns([r1, r_i], pi_i, env)
       J_i_pi_y = policy_return(r_i, pi_y, env)
-      #! Check the values here, make sure the policy roll out values do not overlap with the distance between J_1_pi_1 and J_1_pi_i
-      #! somehow J_i_pi_1 is often larger than J_i_pi_i which makes no sense
       # compute regrets (normalizing over max-min)
       interp_results['regret1'] = (J_1_pi_1 - J_1_pi_i) / (J_1_pi_1 - J_1_pi_x)
       interp_results['regret2'] = (J_i_pi_i - J_i_pi_1) / (J_i_pi_i - J_i_pi_y)
@@ -73,5 +87,5 @@ for env_i in range(num_envs): # each trial comes with its own environment
   results.append(trail_results)
         
 # save as JSON
-with open('results.json', 'w') as f:
-  json.dump(results, f)
+with open(results_path, 'w') as f:
+  json.dump({'config': config, 'results': results}, f)

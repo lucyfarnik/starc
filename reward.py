@@ -7,14 +7,25 @@ from _types import Reward
 # sparse can be a boolean, or None which means we randomly decide
 def random_reward(env: Env,
                   sparse: Optional[bool] = None,
-                  state_dependent: bool = False) -> Reward:
+                  state_dependent: bool = False,
+                  reward_only_in_terminal: bool = False) -> Reward:
   """
     Create a random reward function.
     env: the environment
     sparse: whether the reward function should be sparse (ie all but around 3 are zero)
     state_dependent: whether the reward should depend exclusive on the state
       (rather than the transition)
+    reward_only_in_terminal: whether the reward should only be nonzero when
+      transitioning into the terminal state
   """
+  if reward_only_in_terminal:
+    assert hasattr(env, 'terminal_state'), 'env must be episodic for reward_only_in_terminal'
+    r = np.zeros((env.n_s, env.n_a, env.n_s))
+    for s in range(env.n_s):
+      if s != env.terminal_state:
+        r[s, :, env.terminal_state] = 1 + np.random.randn(env.n_a)
+    return r
+  
   if state_dependent:
     state_r = np.random.randn(env.n_s)
     r = np.zeros((env.n_s, env.n_a, env.n_s))

@@ -44,18 +44,31 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
 
 #! Does not converge for norm_ord 1 or inf
 # @timed
-def minimal_canon(reward: Reward, env: Env, norm_ord: int|float) -> Reward:
+def minimal_canon(
+    reward: Reward, env: Env, norm_ord: int|float, max_iters=100000,
+) -> Reward:
   r = torch.tensor(reward)
+  # potential = torch.tensor(reward.mean(axis=(1, 2)), requires_grad=True)
   potential = torch.zeros(env.n_s, requires_grad=True)
-  optimizer = torch.optim.Adam([potential])
-  for _ in range(20000):
+  frozen_potential = torch.clone(potential) 
+  
+  optimizer = torch.optim.Adam([potential], lr=1e-2)
+  for i in range(max_iters):
     optimizer.zero_grad()
     r_prime = r + env.discount * potential[None, None, :] - potential[:, None, None]
     loss = torch.norm(r_prime, norm_ord)
     loss.backward()
     optimizer.step()
+    # convergence = small gradient or potential hasn't changed in a while
     if torch.norm(potential.grad, 2) < 1e-4: break
+    if i%10000 == 0 and i != 0:
+      if torch.isclose(potential, frozen_potential, rtol=1e-3, atol=1e-3).all():
+        # print(i)
+        break
+      else: frozen_potential = torch.clone(potential)
+    if i==max_iters-1: print("Didn't converge")
   return r_prime.detach().numpy()
+# TODO: test = have a reward function that just 0s everywhere + potential shaping, see if it goes down to 0
 
 canon_funcs = {
   'None': lambda r, _: r,
@@ -80,6 +93,7 @@ def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
             for c_name, val in can.items()}
   # add in minimal canon (which depends on the norm order so it needs different code)
   for n_ord in norm_opts:
+    if n_ord != 2: continue #! REMOVE ME
     if n_ord == 0: continue
     min_can = canon_funcs['Minimal'](reward, env, n_ord)
     norm[f'Minimal-{n_ord}'] = min_can / norm_wrapper(min_can, n_ord)
