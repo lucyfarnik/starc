@@ -17,7 +17,7 @@ def handpicked_experiment(results_path: str):
 
   # experiment starts here
   results = {}
-  for (r1_name, r1), (r2_name, r2) in itertools.product(rewards.items(), rewards.items()):
+  for (r1_name, r1), (r2_name, r2) in itertools.combinations(rewards.items(), 2):
     r_names = f'{r1_name}-{r2_name}'
     print(r_names)
     results[r_names] = {}
@@ -28,10 +28,10 @@ def handpicked_experiment(results_path: str):
 
     # compute the distances for all combinations of canon, norm, and dist
     for cn_name, r1_val in can1.items():
-      r_i_val = can2[cn_name]
+      r2_val = can2[cn_name]
       for d_ord in dist_opts:
         results[r_names][f'{cn_name}-{d_ord}'] = np.linalg.norm(
-          (r1_val - r_i_val).flatten(), d_ord
+          (r1_val - r2_val).flatten(), d_ord
         )
 
     # calculate the best and worst policies under R1 and R2
