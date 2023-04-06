@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-from canon import epic_canon, dard_canon
+from distance.canon import epic_canon, dard_canon
 from env import Env
 from _types import Reward
 

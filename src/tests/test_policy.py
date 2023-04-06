@@ -1,5 +1,5 @@
 import numpy as np
-from policy import optimize, policy_returns, policy_return
+from src.policy import optimize, policy_returns, policy_return
 from tests.toy_env import env, reward, expected_policy, expected_q_vals
 
 def test_optimize():

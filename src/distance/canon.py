@@ -3,7 +3,7 @@ import torch
 from einops import rearrange
 from env import Env
 from _types import Reward
-from coverage_dist import get_state_dist, get_action_dist
+from distance.coverage_dist import get_state_dist, get_action_dist
 from utils import timed
 
 def epic_canon(reward: Reward, env: Env) -> Reward:
