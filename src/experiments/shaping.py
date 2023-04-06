@@ -18,6 +18,8 @@ def shaping_experiment(results_path: str):
   n_a = 8
   sparse_rs = False
 
+  np.random.seed(42)
+
   # experiment starts here
   results = []
   for env_i in range(num_envs): # each trial comes with its own environment
