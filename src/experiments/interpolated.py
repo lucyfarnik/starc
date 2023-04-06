@@ -3,7 +3,7 @@ import json
 from env import RandomEnv
 from env.reward import random_reward, interpolate
 from distance.canon import canon_and_norm
-from policy import optimize, policy_return, policy_returns
+from distance.rollout import optimize, policy_return, policy_returns
 
 def interpolated_experiment(results_path: str):
   config = {
