@@ -1,8 +1,8 @@
 import numpy as np
-from canon import epic_canon, dard_canon, norm_wrapper, canon_and_norm
+from distance.canon import epic_canon, dard_canon, norm_wrapper, canon_and_norm
 from env import Env, RandomEnv
-from coverage_dist import get_state_dist, get_action_dist
-from reward import random_reward
+from distance.coverage_dist import get_state_dist, get_action_dist
+from env.reward import random_reward
 from _types import Reward
 from tests.toy_env import env, reward
 

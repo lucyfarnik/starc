@@ -1,5 +1,5 @@
 import numpy as np
-from reward import random_reward, interpolate
+from env.reward import random_reward, interpolate
 from env import RandomEnv
 
 def test_random_reward():
