@@ -5,19 +5,20 @@ from env.reward import random_reward, interpolate
 from distance.canon import canon_and_norm
 from distance.rollout import optimize, policy_return, policy_returns
 
-def interpolated_experiment(results_path: str):
+def discount_changes_experiment(results_path: str):
   config = {
     # hyperparams
     'num_envs': 16,
-    'num_rewards': 64,
-    'interpolation_steps': 16,
+    'num_rewards': 8,
+    'interpolation_steps': 8,
     'n_s': 32,
     'n_a': 4,
     'seed': 42,
 
     # env and reward settings
     'episodic': False,
-    'discount': 0.95,
+    'low_discount': 0.8,
+    'high_discount': 0.999,
     'sparse': None,
     'state_dependent': False,
     'reward_only_in_terminal': False,
@@ -31,7 +32,9 @@ def interpolated_experiment(results_path: str):
   results = []
   for env_i in range(config['num_envs']): # each trial comes with its own environment
     trail_results = []
-    env = RandomEnv(config['n_s'], config['n_a'], config['discount'], config['episodic'])
+    # TODO: make this "less linear"
+    discount = config['low_discount'] * (config['high_discount'] / config['low_discount']) ** (env_i / (config['num_envs'] - 1))
+    env = RandomEnv(config['n_s'], config['n_a'], discount, config['episodic'])
 
     for reward_i in range(config['num_rewards']): # sampling different rewards
       print(f"Environment {env_i}, rewards {reward_i}")
@@ -91,4 +94,4 @@ def interpolated_experiment(results_path: str):
     json.dump({'config': config, 'results': results}, f)
 
 if __name__ == '__main__':
-  interpolated_experiment()
+  discount_changes_experiment()
