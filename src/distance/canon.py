@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Union
 import torch
 from einops import rearrange
 from env import Env
@@ -45,7 +46,7 @@ def dard_canon(reward: Reward, env: Env) -> Reward:
 #! Does not converge for norm_ord 1 or inf
 # @timed
 def minimal_canon(
-    reward: Reward, env: Env, norm_ord: int|float, max_iters=100000,
+    reward: Reward, env: Env, norm_ord: Union[int, float], max_iters=100000,
 ) -> Reward:
   r = torch.tensor(reward)
   # potential = torch.tensor(reward.mean(axis=(1, 2)), requires_grad=True)
@@ -79,7 +80,7 @@ canon_funcs = {
 
 # computes either the norm, or returns 1 if ord==0
 # which makes it useful in defining canon_and_norm (where norm==0 means don't normalize)
-def norm_wrapper(reward: Reward, ord: int|float) -> float:
+def norm_wrapper(reward: Reward, ord: Union[int, float]) -> float:
   if ord == 0: return 1
   return np.linalg.norm(reward.flatten(), ord)
 
