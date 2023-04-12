@@ -9,7 +9,7 @@ def interpolated_experiment(results_path: str):
   config = {
     # hyperparams
     'num_envs': 16,
-    'num_rewards': 64,
+    'num_rewards': 16,
     'interpolation_steps': 16,
     'n_s': 32,
     'n_a': 4,
@@ -78,8 +78,18 @@ def interpolated_experiment(results_path: str):
         J_1_pi_i, J_i_pi_i = policy_returns([r1, r_i], pi_i, env)
         J_i_pi_y = policy_return(r_i, pi_y, env)
         # compute regrets (normalizing over max-min)
-        interp_results['regret1'] = (J_1_pi_1 - J_1_pi_i) / (J_1_pi_1 - J_1_pi_x)
-        interp_results['regret2'] = (J_i_pi_i - J_i_pi_1) / (J_i_pi_i - J_i_pi_y)
+        regret1_norm = J_1_pi_1 - J_1_pi_x
+        if regret1_norm == 0:
+          if J_1_pi_1 - J_1_pi_i != 0:
+            print("\n\nWarning: regret1_norm is 0, but regret1 is not 0\n\n")
+          regret1_norm = 1
+        regret2_norm = J_i_pi_i - J_i_pi_y
+        if regret2_norm == 0:
+          if J_i_pi_i - J_i_pi_1 != 0:
+            print("\n\nWarning: regret2_norm is 0, but regret2 is not 0\n\n")
+          regret2_norm = 1
+        interp_results['regret1'] = (J_1_pi_1 - J_1_pi_i) / regret1_norm
+        interp_results['regret2'] = (J_i_pi_i - J_i_pi_1) / regret2_norm
 
         # save results
         sample_results.append(interp_results)
