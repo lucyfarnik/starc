@@ -66,30 +66,31 @@ def policy_returns(
   # 2D array, first dim is different reward funcs, second dim is samples
   return_vals = [[] for _ in range(num_rs)]
 
-  for episode_i in range(env.n_s):
-    # init state - we want to have one episode for each possible starting state
-    s = episode_i
-    episode_rewards = [[] for _ in range(num_rs)] # same dims as return_vals
+  for _ in range(env.n_a): # do multiple repetitions to ensure low variance
+    for episode_i in range(env.n_s):
+      # init state - we want to have one episode for each possible starting state
+      s = episode_i
+      episode_rewards = [[] for _ in range(num_rs)] # same dims as return_vals
 
-    for _ in range(steps_per_episode):
-      # # sample action from policy
-      # a = np.random.choice(env.actions, p=policy[s])
-      a = policy[s]
+      for _ in range(steps_per_episode):
+        # # sample action from policy
+        # a = np.random.choice(env.actions, p=policy[s])
+        a = policy[s]
 
-      # next state
-      s_next = np.random.choice(env.states, p=env.transition_dist[s, a])
-      for i, r in enumerate(rewards):
-        episode_rewards[i].append(r[s, a, s_next])
-      s = s_next
-    
-    # at the end we compute the discounted return return
-    for r_i, r_values in enumerate(episode_rewards): # for each return func
-      return_val = 0 # accumulator for the return
-      for i, r in enumerate(r_values):
-        if i == 0: gamma_i = 1.0
-        else: gamma_i *= env.discount
-        return_val += gamma_i * r
-      return_vals[r_i].append(return_val)
+        # next state
+        s_next = np.random.choice(env.states, p=env.transition_dist[s, a])
+        for i, r in enumerate(rewards):
+          episode_rewards[i].append(r[s, a, s_next])
+        s = s_next
+      
+      # at the end we compute the discounted return return
+      for r_i, r_values in enumerate(episode_rewards): # for each return func
+        return_val = 0 # accumulator for the return
+        for i, r in enumerate(r_values):
+          if i == 0: gamma_i = 1.0
+          else: gamma_i *= env.discount
+          return_val += gamma_i * r
+        return_vals[r_i].append(return_val)
 
   return [sum(rs) / len(rs) for rs in return_vals]
   

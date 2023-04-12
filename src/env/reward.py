@@ -3,20 +3,35 @@ from typing import Optional
 from env import Env
 from _types import Reward
 
+def potential_shaping(env: Env, reward: Reward) -> Reward:
+  """
+    Apply potential shaping to the reward function.
+    env: the environment
+    reward: the reward function
+  """
+  potential = np.random.randn(env.n_s)
+  potential *= 10 * np.random.random() # scale
+  potential += np.random.random() # move up or down
+  return reward + env.discount * potential[None, None, :] - potential[:, None, None]
+
 # maybe also have different Gaussian means for different states? move all up or down etc
 # sparse can be a boolean, or None which means we randomly decide
 def random_reward(env: Env,
                   sparse: Optional[bool] = None,
                   state_dependent: bool = False,
-                  reward_only_in_terminal: bool = False) -> Reward:
+                  reward_only_in_terminal: bool = False,
+                  potential_shaped: bool = None) -> Reward:
   """
     Create a random reward function.
     env: the environment
     sparse: whether the reward function should be sparse (ie all but around 3 are zero)
+      (can be None, in which case we randomly decide)
     state_dependent: whether the reward should depend exclusive on the state
       (rather than the transition)
     reward_only_in_terminal: whether the reward should only be nonzero when
       transitioning into the terminal state
+    potential_shaped: whether the reward should be potential shaped
+      (can be None, in which case we randomly decide)
   """
   if reward_only_in_terminal:
     assert hasattr(env, 'terminal_state'), 'env must be episodic for reward_only_in_terminal'
@@ -43,11 +58,9 @@ def random_reward(env: Env,
     r *= 10 * np.random.random()
   if np.random.random() > 0.7: # move the whole thing up or down sometimes
     r += 10 * np.random.random()
-  if np.random.random() > 0.5: # apply potential shaping half the time
-    potential = np.random.randn(env.n_s)
-    potential *= 10 * np.random.random() # scale
-    potential += np.random.random() # move up or down
-    r += env.discount * potential[None, None, :] - potential[:, None, None]
+  # apply potential shaping half the time
+  if potential_shaped is True or (potential_shaped is None and np.random.random() > 0.5):
+    r = potential_shaping(env, r)
   return r
 
 # return a list of rewards between r1 and r2
