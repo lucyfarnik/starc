@@ -2,7 +2,7 @@ import numpy as np
 from distance.canon import epic_canon, dard_canon, minimal_canon, norm_wrapper, canon_and_norm
 from env import Env, RandomEnv
 from distance.coverage_dist import get_state_dist, get_action_dist
-from env.reward import random_reward
+from env.reward import random_reward, potential_shaping
 from _types import Reward
 from tests.toy_env import env, reward
 
@@ -100,6 +100,14 @@ def test_dard_canon():
   expected = slow_dard(r, e)
   output = dard_canon(r, e)
   assert np.isclose(output, expected).all()
+
+def test_minimal_canon_removes_potential_shaping():
+  for _ in range(10):
+    e = RandomEnv(n_s=16, n_a=4)
+    r = np.zeros((e.n_s, e.n_a, e.n_s))
+    shaped_r = potential_shaping(e, r)
+    output = minimal_canon(shaped_r, e, 2)
+    assert np.isclose(output, r, atol=1e-2).all()
 
 def slow_minimal(r: Reward, e: Env):
   assert False, 'TODO implement this'

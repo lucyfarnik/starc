@@ -69,7 +69,6 @@ def minimal_canon(
       else: frozen_potential = torch.clone(potential)
     if i==max_iters-1: print("Didn't converge")
   return r_prime.detach().numpy()
-# TODO: test = have a reward function that just 0s everywhere + potential shaping, see if it goes down to 0
 
 canon_funcs = {
   'None': lambda r, _: r,
