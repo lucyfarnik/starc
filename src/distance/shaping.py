@@ -1,3 +1,6 @@
+#! OUTDATED, new code is in src/distance/trans_mod.py, keeping this here for legacy code compatibility
+
+
 import numpy as np
 import torch
 from typing import Callable
