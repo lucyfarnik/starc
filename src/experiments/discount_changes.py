@@ -66,6 +66,7 @@ def discount_changes_experiment(results_path: str):
 
         # compute the distances for all combinations of canon, norm, and dist
         for cn_name, r1_val in can1.items():
+          if cn_name not in can_i: continue
           r_i_val = can_i[cn_name]
           for d_ord in dist_opts:
             interp_results[f'{cn_name}-{d_ord}'] = np.linalg.norm(

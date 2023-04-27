@@ -63,11 +63,13 @@ def minimal_canon(
     # convergence = small gradient or potential hasn't changed in a while
     if torch.norm(potential.grad, 2) < 1e-4: break
     if i%10000 == 0 and i != 0:
-      if torch.isclose(potential, frozen_potential, rtol=1e-3, atol=1e-3).all():
+      if torch.isclose(potential, frozen_potential, rtol=1e-3, atol=1e-2).all():
         # print(i)
         break
       else: frozen_potential = torch.clone(potential)
-    if i==max_iters-1: print("Didn't converge")
+    if i==max_iters-1:
+      print("Didn't converge")
+      return None #! FIXME
   return r_prime.detach().numpy()
 
 canon_funcs = {
@@ -93,8 +95,9 @@ def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
             for c_name, val in can.items()}
   # add in minimal canon (which depends on the norm order so it needs different code)
   for n_ord in norm_opts:
-    if n_ord != 2: continue #! REMOVE ME
+    if n_ord not in [1, 2]: continue #! REMOVE ME
     if n_ord == 0: continue
     min_can = canon_funcs['Minimal'](reward, env, n_ord)
+    if min_can == None: continue
     norm[f'Minimal-{n_ord}'] = min_can / norm_wrapper(min_can, n_ord)
   return norm

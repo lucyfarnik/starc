@@ -40,15 +40,42 @@ def init_epic_gridworlds(slippery: bool = False) -> tuple[Env, dict[str, Reward]
   sparse_reward[8, :, :] = 1
 
   dense_reward = np.zeros((n_s, n_a, n_s))
-  for s in range(n_s-1):
-    # reward of 2 for going to the right or down
-    if s+1 < n_s: dense_reward[s, :, s+1] = 2
-    if s+3 < n_s: dense_reward[s, :, s+3] = 2
-    # reward of -4 for going to the left or up
-    if s-1 >= 0: dense_reward[s, :, s-1] = -4
-    if s-3 >= 0: dense_reward[s, :, s-3] = -4
-    # reward of -1 for staying in the same place
-    dense_reward[s, :, s] = -1
+  for s in range(n_s):
+    s_row = s // 3
+    s_col = s % 3
+    s_dist = (2-s_row) + (2-s_col)
+    for s_prime in range(n_s):
+      s_prime_row = s_prime // 3
+      s_prime_col = s_prime % 3
+      s_prime_dist = (2-s_prime_row) + (2-s_prime_col)
+      dense_reward[s, :, s_prime] = 2 * (sparse_reward[s, 0, 0] - s_prime_dist + s_dist) - 1
+
+
+
+    # s_row = s // 3
+    # s_col = s % 3
+    # s_dist = (2-s_row) + (2-s_col)
+    # for s_prime in range(n_s):
+    #   s_prime_row = s_prime // 3
+    #   s_prime_col = s_prime % 3
+    #   s_prime_dist = (2-s_prime_row) + (2-s_prime_col)
+    #   if s_prime_dist < s_dist:
+    #     dense_reward[s, :, s_prime] = 2
+    #   elif s_prime_dist > s_dist:
+    #     dense_reward[s, :, s_prime] = -4
+    #   else:
+    #     dense_reward[s, :, s_prime] = -1
+
+    # dense_reward[s, :, s+1:] = 2
+    # dense_reward[s, :, :s] = -4
+    # # reward of 2 for going to the right or down
+    # # if s%3 != 2: dense_reward[s, :, s+1] = 2
+    # # if s+3 < n_s: dense_reward[s, :, s+3] = 2
+    # # # reward of -4 for going to the left or up
+    # # if s%3 != 0: dense_reward[s, :, s-1] = -4
+    # # if s-3 >= 0: dense_reward[s, :, s-3] = -4
+    # # reward of -1 for staying in the same place
+    # dense_reward[s, :, s] = -1
   # reward of 3 for staying in the bottom right corner
   dense_reward[8, :, 8] = 3
 

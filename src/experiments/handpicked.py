@@ -28,6 +28,7 @@ def handpicked_experiment(results_path: str):
 
     # compute the distances for all combinations of canon, norm, and dist
     for cn_name, r1_val in can1.items():
+      if cn_name not in can2: continue
       r2_val = can2[cn_name]
       for d_ord in dist_opts:
         results[r_names][f'{cn_name}-{d_ord}'] = np.linalg.norm(

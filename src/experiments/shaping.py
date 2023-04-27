@@ -6,7 +6,7 @@ from env.reward import random_reward, interpolate
 from distance.canon import canon_and_norm
 from distance.rollout import optimize, policy_return, policy_returns
 from env import RandomEnv
-from distance.distance_funcs import epic, epic_torch
+from distance.distance_funcs import epic
 from distance.shaping import shaped_distance, maximal_transition_dist
 
 def shaping_experiment(results_path: str):

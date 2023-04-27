@@ -24,7 +24,7 @@ def shaped_distance(r1: Reward, r2: Reward, env: Env, d_func: DistanceFunc) -> f
 def maximal_transition_dist(r1: Reward, r2: Reward, env: Env, d_func: DistanceFunc,
                             max_iters: int = 100000) -> float:
   r1, r2 = torch.tensor(r1), torch.tensor(r2)
-  trans_dist = torch.randn(env.transition_dist.shape, requires_grad=True)
+  trans_dist = torch.tensor(torch.randn(env.transition_dist.shape).softmax(dim=-1), requires_grad=True)
   optimizer = torch.optim.Adam([trans_dist])
   frozen_dist = 0 # another convergence criterion - if this stops changing, we're done
   for i in range(max_iters):
@@ -33,6 +33,7 @@ def maximal_transition_dist(r1: Reward, r2: Reward, env: Env, d_func: DistanceFu
                 init_dist=env.init_dist, transition_dist=trans_dist)
     dist = shaped_distance(r1, r2, env_i, d_func)
     loss = -1 * dist # we're maximizing, not minimizing here
+    loss += (trans_dist.sum(dim=-1) - 1).abs().sum() # penalize invalid distributions
     loss.backward()
     optimizer.step()
     if torch.norm(trans_dist.grad, 2) < 1e-4:
@@ -42,5 +43,5 @@ def maximal_transition_dist(r1: Reward, r2: Reward, env: Env, d_func: DistanceFu
         break
       frozen_dist = dist.item()
     if i%10000 == 0 and i > 0:
-      print(f"iter {i:,}, loss {loss.item()}, grad size {torch.norm(trans_dist, 2)}")
-  return dist.item()
+      print(f"iter {i:,}, dist={dist}, invalid distribution penalty={(trans_dist.sum(dim=-1) - 1).abs().sum()}, loss {loss.item()}, grad size {torch.norm(trans_dist, 2)}\n\n")
+  return dist.item(), trans_dist
