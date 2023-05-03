@@ -42,12 +42,13 @@ from _types import Reward, Policy
 def optimize(env: Env, reward: Reward, convergence_thresh=1e-5) -> Policy:
   state_vals = np.zeros(env.n_s)
 
-  for _ in range(10000):
+  for i in range(10000):
     cond_p = env.transition_dist * (reward + env.discount * state_vals[None, None, :])
     new_vals = cond_p.sum(axis=2).max(axis=1)
     diff = state_vals - new_vals
     state_vals = new_vals
     if np.linalg.norm(diff, 2) < convergence_thresh: break
+    if i == 9999: print('Warning: value iteration did not converge')
   
   return cond_p.sum(axis=2).argmax(axis=1)
 

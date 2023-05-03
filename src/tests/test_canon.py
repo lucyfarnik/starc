@@ -1,5 +1,6 @@
 import numpy as np
-from distance.canon import epic_canon, dard_canon, minimal_canon, norm_wrapper, canon_and_norm
+from distance.canon import epic_canon, dard_canon, minimal_canon, state_val_canon
+from distance.canon import norm_wrapper, canon_and_norm
 from env import Env, RandomEnv
 from distance.coverage_dist import get_state_dist, get_action_dist
 from env.reward import random_reward, potential_shaping
@@ -124,6 +125,13 @@ def test_minimal_canon():
   output = minimal_canon(r, e)
   assert np.isclose(output, expected).all()
 
+def test_state_val_canon():
+  for _ in range(10):
+    e = RandomEnv(n_s=16, n_a=4)
+    r1 = random_reward(e)
+    r2 = potential_shaping(e, r1)
+    assert np.isclose(state_val_canon(r1, e), state_val_canon(r2, e), atol=1e-6).all()
+
 # this is just a sanity check to make sure the numpy function does what
 # I think it does
 def test_norms():
@@ -149,15 +157,18 @@ def test_canon_and_norm():
   expected['EPIC-0'] = r_epic
   expected['DARD-0'] = r_dard
   expected['Minimal-0'] = r_minimal
+  expected['StateVal-0'] = None
   for n in [1, 2, float('inf')]:
     expected[f'None-{n}'] = r / np.linalg.norm(r.flatten(), n)
     expected[f'EPIC-{n}'] = r_epic / np.linalg.norm(r_epic.flatten(), n)
     expected[f'DARD-{n}'] = r_dard / np.linalg.norm(r_dard.flatten(), n)
     expected[f'Minimal-{n}'] = r_minimal / np.linalg.norm(r_minimal.flatten(), n)
+    expected[f'StateVal-{n}'] = None
 
   output = canon_and_norm(r, e)
 
   assert expected.keys() == output.keys()
   for key, val in expected.items():
+    if 'StateVal' in key: continue
     assert np.isclose(val, output[key]).all()
     

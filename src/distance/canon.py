@@ -78,11 +78,39 @@ def minimal_canon(
       return None #! FIXME
   return r_prime.detach().numpy()
 
+# Take an arbitrary policy \pi (which could be the completely uniform policy, for example).
+# Compute V^\pi.
+# Let C(R)(s,a,s') = E_{S' ~ \tau(s,a)}[R(s,a,S') + gamma*V^\pi(S') - V^\pi(s)].
+def state_val_canon(reward: Reward, env: Env) -> Reward:
+  # uniform probabilistic policy
+  policy = np.ones((env.n_s, env.n_a)) / env.n_a
+  
+  # compute state values
+  state_vals = np.zeros(env.n_s)
+  for i in range(10000):
+    prev_vals = state_vals.copy()
+    for s in range(env.n_s):
+      r_given_a_s_prime = reward[s] + env.discount * state_vals[None, :]
+      r_dist = env.transition_dist[s] * policy[s, :, None] * r_given_a_s_prime
+      state_vals[s] = r_dist.sum()
+    if np.abs(state_vals - prev_vals).max() < 1e-8: break
+    if i==9999: print("state_val_canon Didn't converge")
+  
+  # compute canonical reward
+  canon = np.zeros_like(reward)
+  for s in range(env.n_s):
+    for a in range(env.n_a):
+      r_given_s_prime = reward[s, a] + env.discount * state_vals - state_vals[s]
+      canon[s, a, :] = (env.transition_dist[s, a] * r_given_s_prime).sum()
+  
+  return canon
+
 canon_funcs = {
   'None': lambda r, _: r,
   'EPIC': epic_canon,
   'DARD': dard_canon,
   'Minimal': minimal_canon,
+  'StateVal': state_val_canon,
 }
 
 # computes either the norm, or returns 1 if ord==0
@@ -95,7 +123,7 @@ norm_opts = [1, 2, float('inf'), 0]
 # returns a dictionary of all the possible canonicalizations and normalizations
 def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
   can = {c_name: canon_funcs[c_name](reward, env)
-         for c_name in ['None', 'EPIC', 'DARD']}
+         for c_name in ['None', 'EPIC', 'DARD', 'StateVal']}
   norm = {f'{c_name}-{n_ord}': val / norm_wrapper(val, n_ord)
             for n_ord in norm_opts
             for c_name, val in can.items()}
