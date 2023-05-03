@@ -9,7 +9,7 @@ from distance.rollout import optimize, policy_return, policy_returns
 
 config = {
   # hyperparams
-  'num_envs': 16,
+  'num_envs': 64,
   'num_rewards': 16,
   'interpolation_steps': 16,
   'n_s': 32,

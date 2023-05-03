@@ -104,6 +104,6 @@ def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
     if n_ord not in [1, 2]: continue #! REMOVE ME
     if n_ord == 0: continue
     min_can = canon_funcs['Minimal'](reward, env, n_ord)
-    if min_can == None: continue
+    if min_can is None: continue # in case the canonicalization didn't converge
     norm[f'Minimal-{n_ord}'] = min_can / norm_wrapper(min_can, n_ord)
   return norm

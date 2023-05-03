@@ -65,7 +65,7 @@ def r_tau_min(reward: Reward, env: Env, max_iters=1e6) -> Reward:
     # convergence checks
     if i%1000 == 0: # loss change over 1k iters is under 1e-8
       loss_val = loss.item()
-      print(f'{loss_val=:<20} delta={loss_frozen - loss_val}')
+      print(f'{loss_val=:<24} delta={loss_frozen - loss_val}')
       loss_is_close = abs(loss_val - loss_frozen) < 1e-8
       if loss_is_close: break
       loss_frozen = loss_val
