@@ -81,7 +81,7 @@ def minimal_canon(
 # Take an arbitrary policy \pi (which could be the completely uniform policy, for example).
 # Compute V^\pi.
 # Let C(R)(s,a,s') = E_{S' ~ \tau(s,a)}[R(s,a,S') + gamma*V^\pi(S') - V^\pi(s)].
-def state_val_canon(reward: Reward, env: Env) -> Reward:
+def state_val_exp_canon(reward: Reward, env: Env) -> Reward:
   # uniform probabilistic policy
   policy = np.ones((env.n_s, env.n_a)) / env.n_a
   
@@ -105,26 +105,65 @@ def state_val_canon(reward: Reward, env: Env) -> Reward:
   
   return canon
 
+# C(R)(s,a,s') = r(s,a,s') - V^pi(s) + gamma*V^pi(s')
+def state_val_canon(reward: Reward, env: Env) -> Reward:
+  policy = np.ones((env.n_s, env.n_a)) / env.n_a
+
+  # compute state values
+  state_vals = np.zeros(env.n_s)
+  for i in range(10000):
+    prev_vals = state_vals.copy()
+    for s in range(env.n_s):
+      r_given_a_s_prime = reward[s] + env.discount * state_vals[None, :]
+      r_dist = env.transition_dist[s] * policy[s, :, None] * r_given_a_s_prime
+      state_vals[s] = r_dist.sum()
+    if np.abs(state_vals - prev_vals).max() < 1e-8: break
+    if i==9999: print("state_val_canon Didn't converge")
+
+  # compute canonical reward
+  canon = np.zeros_like(reward)
+  for s in range(env.n_s):
+    for a in range(env.n_a):
+      for s_prime in range(env.n_s):
+        canon[s,a,s_prime] = reward[s,a,s_prime] - state_vals[s] + env.discount*state_vals[s_prime]
+  
+  return canon
+
+
 canon_funcs = {
   'None': lambda r, _: r,
   'EPIC': epic_canon,
   'DARD': dard_canon,
   'Minimal': minimal_canon,
   'StateVal': state_val_canon,
+  'StateValExp': state_val_exp_canon,
 }
 
-# computes either the norm, or returns 1 if ord==0
-# which makes it useful in defining canon_and_norm (where norm==0 means don't normalize)
-def norm_wrapper(reward: Reward, ord: Union[int, float]) -> float:
-  if ord == 0: return 1
+def norm_wrapper(reward: Reward, env: Env, ord: Union[int, float, str]) -> float:
+  """Wrapper for np.linalg.norm that allows for weighted norms and baseline (no norm)
+  ord: 0, 1, 2, 'weighted_1', 'weighted_2', 'weighted_inf', 'inf'
+  """
+  if ord == 0: return 1 # baseline (no norm)
+  if 'weighted' in str(ord): # weighted norms
+    ord_num = float(ord.split('_')[1])
+    if ord_num == np.inf:
+        return np.max(np.abs(reward) * env.transition_dist)
+    r = np.abs(reward)
+    r **= ord_num
+    r *= env.transition_dist
+    accum = np.sum(r)
+    accum **= 1 / ord_num
+    return accum
+
+  # regular norm
   return np.linalg.norm(reward.flatten(), ord)
 
-norm_opts = [1, 2, float('inf'), 0]
+norm_opts = [1, 2, float('inf'), 'weighted_1', 'weighted_2', 'weighted_inf', 0]
 # returns a dictionary of all the possible canonicalizations and normalizations
 def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
   can = {c_name: canon_funcs[c_name](reward, env)
-         for c_name in ['None', 'EPIC', 'DARD', 'StateVal']}
-  norm = {f'{c_name}-{n_ord}': val / norm_wrapper(val, n_ord)
+         for c_name in ['None', 'EPIC', 'DARD', 'StateVal', 'StateValExp']}
+  norm = {f'{c_name}-{n_ord}': val / norm_wrapper(val, env, n_ord)
             for n_ord in norm_opts
             for c_name, val in can.items()}
   # add in minimal canon (which depends on the norm order so it needs different code)
@@ -133,5 +172,5 @@ def canon_and_norm(reward: Reward, env: Env) -> dict[str, Reward]:
     if n_ord == 0: continue
     min_can = canon_funcs['Minimal'](reward, env, n_ord)
     if min_can is None: continue # in case the canonicalization didn't converge
-    norm[f'Minimal-{n_ord}'] = min_can / norm_wrapper(min_can, n_ord)
+    norm[f'Minimal-{n_ord}'] = min_can / norm_wrapper(min_can, env, n_ord)
   return norm

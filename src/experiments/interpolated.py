@@ -30,7 +30,11 @@ def interpolated_env_run(env_i):
   env = RandomEnv(config['n_s'], config['n_a'], config['discount'], config['episodic'])
 
   for reward_i in range(config['num_rewards']): # sampling different rewards
-    print(f"Environment {env_i}, rewards {reward_i}")
+    # add the env and reward to the log
+    with open(f"{temp_dir}/log.txt", 'a') as f:
+      f.write(f"Environment {env_i}, rewards {reward_i}\n")
+    # print(f"Environment {env_i}, rewards {reward_i}")
+
     sample_results = []
 
     # generate random rewards
@@ -99,6 +103,9 @@ def interpolated_experiment(results_path: str):
 
   # create temp results directory
   os.makedirs(temp_dir, exist_ok=True)
+  # create log file
+  with open(f'{temp_dir}/log.txt', 'w') as f:
+    f.write(json.dumps(config) + '\n\n')
 
   # experiment starts here
   with Pool() as p:

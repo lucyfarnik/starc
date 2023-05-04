@@ -142,8 +142,14 @@ def test_norms():
 
 def test_norm_wrapper():
   test_in = np.array([1, 2, 3])
-  assert norm_wrapper(test_in, 1) == 6
-  assert norm_wrapper(test_in, 0) == 1
+  assert norm_wrapper(test_in, None, 1) == 6
+  assert norm_wrapper(test_in, None, 0) == 1
+
+  env = Env(n_s=2, n_a=2, discount=0.9, init_dist=np.array([0.5, 0.5]),
+            transition_dist=np.array([[[0.8, 0.2], [0.8, 0.2]],
+                                      [[0.8, 0.2], [0.8, 0.2]]]))
+  r = np.array([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]])
+  assert abs(norm_wrapper(r, env, 'weighted_1') - 16.8) < 1e-5
 
 def test_canon_and_norm():
   e = RandomEnv(n_s=32, n_a=4)
