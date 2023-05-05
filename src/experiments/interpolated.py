@@ -4,7 +4,7 @@ import numpy as np
 import json
 from env import RandomEnv
 from env.reward import random_reward, interpolate
-from distance.canon import canon_and_norm
+from distance.canon import canon_and_norm, norm_wrapper
 from distance.rollout import optimize, policy_return, policy_returns
 
 config = {
@@ -24,7 +24,7 @@ config = {
   'reward_only_in_terminal': False,
 }
 temp_dir = 'temp/interpolated'
-dist_opts = [1, 2, float('inf')]
+dist_opts = [1, 2, float('inf'), 'weighted_1', 'weighted_2', 'weighted_inf']
 
 def interpolated_env_run(env_i):
   env = RandomEnv(config['n_s'], config['n_a'], config['discount'], config['episodic'])
@@ -66,9 +66,8 @@ def interpolated_env_run(env_i):
         if cn_name not in can_i: continue
         r_i_val = can_i[cn_name]
         for d_ord in dist_opts:
-          interp_results[f'{cn_name}-{d_ord}'] = np.linalg.norm(
-            (r1_val - r_i_val).flatten(), d_ord
-          )
+          interp_results[f'{cn_name}-{d_ord}'] = norm_wrapper(r1_val - r_i_val,
+                                                              env, d_ord)
 
       # policies for R_i
       pi_i = optimize(env, r_i) # best policy under R_i
