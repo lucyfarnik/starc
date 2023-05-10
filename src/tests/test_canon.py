@@ -1,6 +1,7 @@
 import numpy as np
-from distance.canon import epic_canon, dard_canon, minimal_canon, state_val_canon
-from distance.canon import norm_wrapper, canon_and_norm
+from distance.canon import epic_canon, dard_canon, minimal_potential_canon, state_val_canon
+from distance.canon import canon_and_norm
+from distance.norm import norm
 from env import Env, RandomEnv
 from distance.coverage_dist import get_state_dist, get_action_dist
 from env.reward import random_reward, potential_shaping
@@ -107,7 +108,7 @@ def test_minimal_canon_removes_potential_shaping():
     e = RandomEnv(n_s=16, n_a=4)
     r = np.zeros((e.n_s, e.n_a, e.n_s))
     shaped_r = potential_shaping(e, r)
-    output = minimal_canon(shaped_r, e, 2)
+    output = minimal_potential_canon(shaped_r, e, 2)
     assert np.isclose(output, r, atol=1e-2).all()
 
 def slow_minimal(r: Reward, e: Env):
@@ -115,14 +116,14 @@ def slow_minimal(r: Reward, e: Env):
 
 def test_minimal_canon_toy():
   expected_shaped = slow_minimal(reward, env) 
-  output = minimal_canon(reward, env)
+  output = minimal_potential_canon(reward, env)
   assert np.isclose(output, expected_shaped).all()
 
 def test_minimal_canon():
   e = RandomEnv(n_s=16, n_a=4)
   r = random_reward(e)
   expected = slow_minimal(r, e)
-  output = minimal_canon(r, e)
+  output = minimal_potential_canon(r, e)
   assert np.isclose(output, expected).all()
 
 def test_state_val_canon():
@@ -140,16 +141,16 @@ def test_norms():
   assert np.linalg.norm(test_in, 2) - 3.741657 < 1e-5
   assert np.linalg.norm(test_in, float('inf')) == 3
 
-def test_norm_wrapper():
+def test_norm():
   test_in = np.array([1, 2, 3])
-  assert norm_wrapper(test_in, None, 1) == 6
-  assert norm_wrapper(test_in, None, 0) == 1
+  assert norm(test_in, None, 1) == 6
+  assert norm(test_in, None, 0) == 1
 
   env = Env(n_s=2, n_a=2, discount=0.9, init_dist=np.array([0.5, 0.5]),
             transition_dist=np.array([[[0.8, 0.2], [0.8, 0.2]],
                                       [[0.8, 0.2], [0.8, 0.2]]]))
   r = np.array([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]])
-  assert abs(norm_wrapper(r, env, 'weighted_1') - 16.8) < 1e-5
+  assert abs(norm(r, env, 'weighted_1') - 16.8) < 1e-5
 
 def test_canon_and_norm():
   e = RandomEnv(n_s=32, n_a=4)

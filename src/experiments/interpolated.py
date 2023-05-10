@@ -1,16 +1,18 @@
 from multiprocessing import Pool
 import os
 import numpy as np
+import torch
 import json
 from env import RandomEnv
 from env.reward import random_reward, interpolate
-from distance.canon import canon_and_norm, norm_wrapper
+from distance.canon import canon_and_norm
+from distance.norm import norm
 from distance.rollout import optimize, policy_return, policy_returns
 
 config = {
   # hyperparams
-  'num_envs': 64,
-  'num_rewards': 16,
+  'num_envs': 8,
+  'num_rewards': 8,
   'interpolation_steps': 16,
   'n_s': 32,
   'n_a': 4,
@@ -66,8 +68,9 @@ def interpolated_env_run(env_i):
         if cn_name not in can_i: continue
         r_i_val = can_i[cn_name]
         for d_ord in dist_opts:
-          interp_results[f'{cn_name}-{d_ord}'] = norm_wrapper(r1_val - r_i_val,
-                                                              env, d_ord)
+          val = norm(r1_val - r_i_val, env, d_ord)
+          if type(val) in [torch.Tensor, np.float32]: val = val.item()
+          interp_results[f'{cn_name}-{d_ord}'] = val
 
       # policies for R_i
       pi_i = optimize(env, r_i) # best policy under R_i
