@@ -2,8 +2,10 @@ import numpy as np
 from env import Env
 from _types import Reward
 
-# same as above but with C(R)(s,a,s') = r(s,a,s') - V^pi(s) + gamma*V^pi(s')
-def state_val_canon(reward: Reward, env: Env) -> Reward:
+# Take an arbitrary policy \pi (which could be the completely uniform policy, for example).
+# Compute V^\pi.
+# C(R)(s,a,s') = r(s,a,s') - V^pi(s) + gamma*V^pi(s')
+def value_potential_canon(reward: Reward, env: Env) -> Reward:
   policy = np.ones((env.n_s, env.n_a)) / env.n_a
 
   # compute state values

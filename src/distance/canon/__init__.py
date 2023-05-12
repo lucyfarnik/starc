@@ -3,8 +3,8 @@ from _types import Reward
 from distance.canon.epic import epic_canon
 from distance.canon.dard import dard_canon
 from distance.canon.minimal_potential import minimal_potential_canon
-from distance.canon.state_val import state_val_canon
-from distance.canon.state_val_exp import state_val_exp_canon
+from distance.canon.value_potential import value_potential_canon
+from distance.canon.value import value_canon
 from distance.canon.minimal import minimal_canon
 from distance.norm import norm
 
@@ -13,8 +13,8 @@ canon_funcs = {
   'EPIC': epic_canon,
   'DARD': dard_canon,
   'MinimalPotential': minimal_potential_canon,
-  'StateVal': state_val_canon,
-  'StateValExp': state_val_exp_canon,
+  'ValuePotential': value_potential_canon,
+  'Value': value_canon,
   'Minimal': minimal_canon,
 }
 

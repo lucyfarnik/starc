@@ -5,7 +5,7 @@ from _types import Reward
 # Take an arbitrary policy \pi (which could be the completely uniform policy, for example).
 # Compute V^\pi.
 # Let C(R)(s,a,s') = E_{S' ~ \tau(s,a)}[R(s,a,S') + gamma*V^\pi(S') - V^\pi(s)].
-def state_val_exp_canon(reward: Reward, env: Env) -> Reward:
+def value_canon(reward: Reward, env: Env) -> Reward:
   # uniform probabilistic policy
   policy = np.ones((env.n_s, env.n_a)) / env.n_a
   
