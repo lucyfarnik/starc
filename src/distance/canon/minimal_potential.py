@@ -34,6 +34,6 @@ def minimal_potential_canon(
       if loss_is_close: break
       loss_frozen = loss_val
     if i==max_iters-1:
-      print("minimal_canon Didn't converge")
+      print("minimal_potential_canon Didn't converge")
       return None
   return r_prime.detach().numpy()

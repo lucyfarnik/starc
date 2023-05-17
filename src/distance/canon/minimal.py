@@ -75,7 +75,7 @@ def minimal_canon(reward: Reward, env: Env, max_iters=1e6) -> Reward:
       break
     if i==max_iters-1: # didn't converge
       print(i, max_iters)
-      print("minimal_s_prime_canon Didn't converge")
+      print("minimal_canon Didn't converge")
       return None
 
   return r_2.detach().numpy()

@@ -54,14 +54,14 @@ def interpolated_env_run(env_i):
     J_1_pi_x = policy_return(r1, pi_x, env)
 
     # canonicalizations and normalizations of R1
-    can1 = canon_and_norm(r1, env)
+    can1 = canon_and_norm(r1, env, incl_minimal=False)
 
     # interpolate between R1 and R2
     for r_i in interpolate(r1, r2, config['interpolation_steps']):
       interp_results = {}
 
       # canonicalizations and normalizations of R_i
-      can_i = canon_and_norm(r_i, env)
+      can_i = canon_and_norm(r_i, env, incl_minimal=False)
 
       # compute the distances for all combinations of canon, norm, and dist
       for cn_name, r1_val in can1.items():
