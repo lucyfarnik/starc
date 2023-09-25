@@ -1,5 +1,5 @@
 import numpy as np
-from distance.canon import epic_canon, dard_canon, minimal_potential_canon, state_val_canon
+from distance.canon import epic_canon, dard_canon, minimal_potential_canon, value_canon 
 from distance.canon import canon_and_norm
 from distance.norm import norm
 from env import Env, RandomEnv
@@ -126,12 +126,12 @@ def test_minimal_canon():
   output = minimal_potential_canon(r, e)
   assert np.isclose(output, expected).all()
 
-def test_state_val_canon():
+def test_value_canon():
   for _ in range(10):
     e = RandomEnv(n_s=16, n_a=4)
     r1 = random_reward(e)
     r2 = potential_shaping(e, r1)
-    assert np.isclose(state_val_canon(r1, e), state_val_canon(r2, e), atol=1e-6).all()
+    assert np.isclose(value_canon(r1, e), value_canon(r2, e), atol=1e-6).all()
 
 # this is just a sanity check to make sure the numpy function does what
 # I think it does
