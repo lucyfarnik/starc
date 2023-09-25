@@ -15,11 +15,11 @@ def norm_cont(reward: RewardCont,
 
   if ord == 0: return 1 # baseline (no norm)
 
-  is_weighted = type(ord) is str and 'weighted' in ord
-  norm_ord = float(ord.split('_')[1]) if is_weighted else float(ord)
+  # is_weighted = type(ord) is str and 'weighted' in ord
+  # norm_ord = float(ord.split('_')[1]) if is_weighted else float(ord)
 
   # L_infty norm — find the maximum
-  if norm_ord == float('inf'):
+  if ord == float('inf'):
     # do random sampling to find the maximum
     # TODO try assuming the function is convex and differentiable in Torch; do optimization
     max_sample = float('-inf')
@@ -29,9 +29,8 @@ def norm_cont(reward: RewardCont,
       a = sample_space(env_info.action_space)
       s_prime = sample_space(env_info.state_space)
 
-      #! THIS SHOULD TAKE FOREVER, BUT SOMEHOW DOESN'T
       sample_val = abs(reward(s, a, s_prime)) # |r(s,a,s')|
-      if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
+      # if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
 
       if sample_val > max_sample:
         max_sample = sample_val
@@ -45,9 +44,8 @@ def norm_cont(reward: RewardCont,
     a = sample_space(env_info.action_space)
     s_prime = sample_space(env_info.state_space)
 
-    #! THIS SHOULD TAKE FOREVER, BUT SOMEHOW DOESN'T
-    sample_val = abs(reward(s, a, s_prime))**norm_ord # |r(s,a,s')|^p
-    if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
+    sample_val = abs(reward(s, a, s_prime))**ord # |r(s,a,s')|^p
+    # if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
 
     sample_sum += sample_val
   
@@ -63,5 +61,5 @@ def norm_cont(reward: RewardCont,
   # (V / N * sum)^(1/p)
   # TODO check that including the volume in this way is the "normal" Lp norm
   # TODO (though it's definitely bilipschitz equivalent to it so doesn't really matter)
-  return (domain_volume / n_samples * sample_sum)**(1/norm_ord)
+  return (domain_volume / n_samples * sample_sum)**(1/ord)
   

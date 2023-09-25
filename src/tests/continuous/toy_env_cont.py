@@ -18,10 +18,6 @@ def trans_dist(s, a):
       s_prime[idx] = 2 * state_space[idx][1] - s_prime[idx]
 
   return s_prime
-
-def trans_prob(s, a, s_prime):
-  return 0.01
-
 def reward(s, a, s_prime):
   return s[0] * (s_prime[0] - s[0]) + s[1] * (s[1] - s_prime[1]) + np.random.normal(0, 1)
 
@@ -36,4 +32,4 @@ def state_vals(s) -> float: # note: this isn't actually accurate, it assumes dis
 
   return val
 
-env_info = EnvInfoCont(trans_dist, trans_prob, discount, state_space, action_space, state_vals)
+env_info = EnvInfoCont(trans_dist, discount, state_space, action_space, state_vals)
