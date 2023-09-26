@@ -4,6 +4,11 @@ import numpy as np
 from continuous.distance import canon_and_norm_cont
 from continuous.norm import norm_cont
 from continuous.env import get_vec_env, train_agent, predict_next_state
+from continuous.rewards import (
+    GroundTruthReward, NegativeGroundReward, PotentialShapedReward,
+    RandomReward, SPrimeReward, SecondPeakReward,
+    SemanticallyIdenticalReward
+)
 from _types import EnvInfoCont, RewardCont
 
 config = {
@@ -26,22 +31,14 @@ def continuous_experiment(results_path: str):
   )
 
   # create the rewards
-  # TODO all of this
-  ground_truth_reward = None
-  potential_shaped_reward = None
-  s_redistributed_reward = None
-  second_peak_reward = None
-  same_seman_diff_struct_reward = None
-  negative_ground_reward = None
-  random_reward = None
-
+  ground_truth_reward = GroundTruthReward(env)
   non_ground_rewards = {
-    'potential_shaped': potential_shaped_reward,
-    's_redistributed': s_redistributed_reward,
-    'second_peak': second_peak_reward,
-    'same_seman_diff_struct': same_seman_diff_struct_reward,
-    'negative_ground': negative_ground_reward,
-    'random': random_reward,
+    'potential_shaped': PotentialShapedReward(env, state_space),
+    's_prime': SPrimeReward(env),
+    'second_peak': SecondPeakReward(env, space_bounds),
+    'semantically_identical': SemanticallyIdenticalReward(env),
+    'negative_ground': NegativeGroundReward(env, state_space),
+    'random': RandomReward(env, state_space, action_space),
   }
 
   results: dict[str, float] = {}
