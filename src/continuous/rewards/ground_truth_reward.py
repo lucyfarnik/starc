@@ -2,16 +2,18 @@ from typing import Optional
 import numpy as np
 import torch
 from continuous.rewards.reward_func import RewardFunc
+from continuous.env import ReacherEnv
 
 class GroundTruthReward(RewardFunc):
     """
         This is the original reward function from the ReacherEnv class.
     """
     def __call__(self,
+                 env: ReacherEnv,
                  state: Optional[torch.Tensor], #TODO fix the types
                  action,
                  next_state) -> float:
-        vec = self.env.get_body_com("fingertip") - self.env.get_body_com("target")
+        vec = env.get_body_com("fingertip") - env.get_body_com("target")
         reward_dist = -np.linalg.norm(vec)
         reward_ctrl = -np.square(action).sum()
         reward = reward_dist + reward_ctrl

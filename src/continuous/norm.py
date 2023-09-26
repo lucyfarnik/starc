@@ -1,11 +1,11 @@
-import numpy as np
-from _types import RewardCont, EnvInfoCont
+from _types import RewardCont, Space
 from typing import Union
 from utils import timed, sample_space
  
 @timed
 def norm_cont(reward: RewardCont,
-              env_info: EnvInfoCont,
+              state_space: Space,
+              action_space: Space,
               ord: Union[int, float, str] = 2,
               n_samples: int = 10**3) -> float:
   """
@@ -25,9 +25,9 @@ def norm_cont(reward: RewardCont,
     max_sample = float('-inf')
     for _ in range(n_samples):
       # sample s, a, s'
-      s = sample_space(env_info.state_space)
-      a = sample_space(env_info.action_space)
-      s_prime = sample_space(env_info.state_space)
+      s = sample_space(state_space)
+      a = sample_space(action_space)
+      s_prime = sample_space(state_space)
 
       sample_val = abs(reward(s, a, s_prime)) # |r(s,a,s')|
       # if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
@@ -40,9 +40,9 @@ def norm_cont(reward: RewardCont,
   sample_sum = 0 
   for _ in range(n_samples):
     # sample s, a, s'
-    s = sample_space(env_info.state_space)
-    a = sample_space(env_info.action_space)
-    s_prime = sample_space(env_info.state_space)
+    s = sample_space(state_space)
+    a = sample_space(action_space)
+    s_prime = sample_space(state_space)
 
     sample_val = abs(reward(s, a, s_prime))**ord # |r(s,a,s')|^p
     # if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
@@ -51,10 +51,10 @@ def norm_cont(reward: RewardCont,
   
   # volume of the domain, ie the integral of 1 over the domain
   state_space_volume = 1
-  for interval in env_info.state_space:
+  for interval in state_space:
     state_space_volume *= interval[1] - interval[0]
   action_space_volume = 1
-  for interval in env_info.action_space:
+  for interval in action_space:
     action_space_volume *= interval[1] - interval[0]
   domain_volume = (state_space_volume ** 2) * action_space_volume
 

@@ -26,7 +26,8 @@ def canon_and_norm_cont(reward: RewardCont,
     for c_name, val in can_r.items():
         for n_ord in norm_opts:
             def normalized(s: float, a: float, s_prime: float) -> float:
-                return val(s, a, s_prime) / norm_cont(val, env_info, n_ord)
+                return val(s, a, s_prime) / norm_cont(val, env_info.state_space,
+                                                      env_info.action_space, n_ord)
                                                       
             norm_r[f'{c_name}-{n_ord}'] = normalized
     
