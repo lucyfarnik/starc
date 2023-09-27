@@ -15,20 +15,25 @@ norm_opts = [1, 2, float('inf'), 'weighted_1', 'weighted_2', 'weighted_inf']
 
 @timed
 def canon_and_norm_cont(reward: RewardCont,
-                        env_info: EnvInfoCont) -> Dict[str, RewardCont]:
+                        env_info: EnvInfoCont,
+                        n_canon_samples: int = 10**6,
+                        n_norm_samples: int = 10**3) -> Dict[str, RewardCont]:
     """
     Returns a dictionary of all the possible canonicalizations and normalizations
     (lists of possible options are defined in as constants in this file).
     """
-    can_r = {c_name: canon_funcs[c_name](reward, env_info)
+    can_r = {c_name: canon_funcs[c_name](reward, env_info, n_canon_samples)
             for c_name in canon_funcs.keys()}
     
     norm_r = {}
     for c_name, val in can_r.items():
         for n_ord in norm_opts:
             def normalized(s: float, a: float, s_prime: float) -> float:
-                return val(s, a, s_prime) / norm_cont(val, env_info.state_space,
-                                                      env_info.action_space, n_ord)
+                return val(s, a, s_prime) / norm_cont(val,
+                                                      env_info.state_space,
+                                                      env_info.action_space,
+                                                      n_ord,
+                                                      n_norm_samples)
                                                       
             norm_r[f'{c_name}-{n_ord}'] = normalized
     

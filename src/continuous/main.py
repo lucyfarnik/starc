@@ -41,9 +41,14 @@ def continuous_experiment(results_path: str):
 
   # loop over all rewards and compute their distance from the ground truth
   standardized_gt = canon_and_norm_cont(ground_truth_env.reward_func_curried,
-                                        ground_truth_env.env_info)
+                                        ground_truth_env.env_info,
+                                        config['n_canon_samples'],
+                                        config['n_norm_samples'])
   for r2_name, e2 in non_ground_envs.items():
-    standardized_r2 = canon_and_norm_cont(e2.reward_func_curried, e2.env_info)
+    standardized_r2 = canon_and_norm_cont(e2.reward_func_curried,
+                                          e2.env_info,
+                                          config['n_canon_samples'],
+                                          config['n_norm_samples'])
 
     for cn_name in standardized_gt:
       cn_gt = standardized_gt[cn_name]
@@ -52,7 +57,11 @@ def continuous_experiment(results_path: str):
       for d_ord in [1, 2, float('inf')]:
         diff_func = lambda *args: cn_gt(*args) - cn_r2(*args)
 
-        dist = norm_cont(diff_func, ReacherEnv.state_space, ReacherEnv.act_space, d_ord)
+        dist = norm_cont(diff_func,
+                         ReacherEnv.state_space,
+                         ReacherEnv.act_space,
+                         d_ord,
+                         config['n_norm_samples'])
 
         results_key = f'{r2_name}-{cn_name}-{d_ord}'
         print(f'{results_key}: {dist}')
