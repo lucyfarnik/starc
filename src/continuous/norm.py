@@ -1,7 +1,8 @@
 from _types import RewardCont, Space
 from typing import Union
 from utils import timed, sample_space
- 
+import concurrent.futures
+
 @timed
 def norm_cont(reward: RewardCont,
               state_space: Space,

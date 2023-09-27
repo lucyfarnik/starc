@@ -1,3 +1,4 @@
+from typing import Dict
 from env import Env
 from _types import Reward
 from distance.canon.epic import epic_canon
@@ -20,7 +21,7 @@ canon_funcs = {
 
 norm_opts = [1, 2, float('inf'), 'weighted_1', 'weighted_2', 'weighted_inf', 0]
 # returns a dictionary of all the possible canonicalizations and normalizations
-def canon_and_norm(reward: Reward, env: Env, incl_minimal=True) -> dict[str, Reward]:
+def canon_and_norm(reward: Reward, env: Env, incl_minimal=True) -> Dict[str, Reward]:
   can_r = {c_name: canon_funcs[c_name](reward, env)
          for c_name in canon_funcs.keys() if 'Minimal' not in c_name}
   norm_r = {f'{c_name}-{n_ord}': val / norm(val, env, n_ord)

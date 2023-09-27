@@ -15,8 +15,8 @@ class SemanticallyIdenticalReward(RewardFunc):
                  action,
                  next_state) -> float:
         # evaluate a Gaussian centered on the target
-        x, y = env.get_body_com("fingertip")
-        x0, y0 = env.get_body_com("target")
+        x, y, _ = env.get_body_com("fingertip")
+        x0, y0, _ = env.get_body_com("target")
         # we assume the covariance is the identity matrix
         gauss_val = np.exp(-((x-x0)**2/2 + (y-y0)**2/2))
 

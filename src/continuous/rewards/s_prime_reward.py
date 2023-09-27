@@ -23,7 +23,9 @@ class SPrimeReward(RewardFunc):
                  state: Optional[torch.Tensor], #TODO fix the types
                  action,
                  next_state) -> float:
-        if next_state == ReacherEnv.predict_next_state(state, action):
-            return self.ground_truth(state, action, next_state)
+        if state is None or np.allclose(next_state,
+                                        ReacherEnv.predict_next_state(state, action),
+                                        rtol=1e-3, atol=1e-3):
+            return self.ground_truth(env, state, action, next_state)
         
         return 1e6

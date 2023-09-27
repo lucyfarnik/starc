@@ -1,3 +1,4 @@
+from typing import Dict
 from continuous.canon.val import val_canon_cont
 from continuous.canon.epic import epic_canon_cont
 from continuous.canon.dard import dard_canon_cont
@@ -14,7 +15,7 @@ norm_opts = [1, 2, float('inf'), 'weighted_1', 'weighted_2', 'weighted_inf']
 
 @timed
 def canon_and_norm_cont(reward: RewardCont,
-                        env_info: EnvInfoCont) -> dict[str, RewardCont]:
+                        env_info: EnvInfoCont) -> Dict[str, RewardCont]:
     """
     Returns a dictionary of all the possible canonicalizations and normalizations
     (lists of possible options are defined in as constants in this file).

@@ -1,9 +1,10 @@
-from typing import Optional, Tuple
+from typing import Optional
 import numpy as np
 import torch
 from continuous.env import ReacherEnv
 from continuous.rewards.reward_func import RewardFunc
 from continuous.rewards.ground_truth_reward import GroundTruthReward
+from utils import sample_space
 
 class SecondPeakReward(RewardFunc):
     """
@@ -19,10 +20,10 @@ class SecondPeakReward(RewardFunc):
     
     def create_second_peak(self, env):
         # pick a random point in the space that's not too close to the target
-        target_position = env.get_body_com("target")
-        self.second_peak = np.random.uniform(*ReacherEnv.state_space, size=2)
-        while np.linalg.norm(self.second_peak - target_position) < 1:
-            self.second_peak = np.random.uniform(*ReacherEnv.state_space, size=2)
+        self.target_position = env.get_body_com("target")[:2]
+        self.second_peak = sample_space(ReacherEnv.state_space[4:6])
+        while np.linalg.norm(self.second_peak - self.target_position) < 1:
+            self.second_peak = sample_space(ReacherEnv.state_space[4:6])
          
     def __call__(self,
                  env: ReacherEnv,
@@ -32,12 +33,13 @@ class SecondPeakReward(RewardFunc):
 
         # if there currently isn't a second peak, or if the target has moved,
         # create a new second peak
-        if self.second_peak is None or \
-              not np.allclose(env.get_body_com("target"), self.target_position):
-                self.create_second_peak(env)
+        if self.second_peak is None or not np.allclose(env.get_body_com("target")[:2],
+                                                       self.target_position,
+                                                       rtol=1e-3):
+            self.create_second_peak(env)
         
 
-        reward = self.ground_truth(state, action, next_state)
-        reward += -0.2*np.linalg.norm(self.second_peak - env.get_body_com("fingertip"))
+        reward = self.ground_truth(env, state, action, next_state)
+        reward += -0.2*np.linalg.norm(self.second_peak - env.get_body_com("fingertip")[:2])
 
         return reward

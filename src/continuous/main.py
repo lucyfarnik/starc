@@ -33,17 +33,17 @@ def continuous_experiment(results_path: str):
   results: dict[str, float] = {}
 
   # loop over all rewards and compute their distance from the ground truth
-  standardized_gt = canon_and_norm_cont(ground_truth_env.reward_func,
+  standardized_gt = canon_and_norm_cont(ground_truth_env.reward_func_curried,
                                         ground_truth_env.env_info)
   for r2_name, e2 in non_ground_envs.items(): # TODO parallelize as much as possible
-    standardized_r2 = canon_and_norm_cont(e2.reward_func, e2.env_info)
+    standardized_r2 = canon_and_norm_cont(e2.reward_func_curried, e2.env_info)
 
     for cn_name in standardized_gt:
       cn_gt = standardized_gt[cn_name]
       cn_r2 = standardized_r2[cn_name]
 
       for d_ord in [1, 2, float('inf')]:
-        diff_func = lambda s, a, sp: cn_gt(s, a, sp) - cn_r2(s, a, sp)
+        diff_func = lambda *args: cn_gt(*args) - cn_r2(*args)
 
         dist = norm_cont(diff_func, ReacherEnv.state_space, ReacherEnv.act_space, d_ord)
 

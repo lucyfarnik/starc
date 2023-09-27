@@ -1,9 +1,10 @@
 # taken from the EPIC paper section 5
+from typing import Tuple, Dict
 import numpy as np
 from env import Env
 from _types import Reward
 
-def init_epic_gridworlds(slippery: bool = False) -> tuple[Env, dict[str, Reward]]:
+def init_epic_gridworlds(slippery: bool = False) -> Tuple[Env, Dict[str, Reward]]:
   n_s = 9 # 3x3 grid, 0 is top left, 8 is bottom right
   n_a = 5 # right, down, left, up, stay
   discount = 0.99

@@ -1,7 +1,8 @@
+import numpy as np
 from typing import Tuple
+from functools import partial
 from gym.envs.mujoco.reacher import ReacherEnv as OriginalReacher
-from continuous.state_vals import StateVals
-from _types import RewardCont, EnvInfoCont, Space
+from _types import EnvInfoCont, Space
 
 class ReacherEnv(OriginalReacher):
     """
@@ -29,17 +30,19 @@ class ReacherEnv(OriginalReacher):
         (-1, 1), # Torque applied at the second hinge (connecting the two links)
     ]
 
-    def __init__(self, reward_func: RewardCont, discount: float, **kwargs):
-        self.init_kwargs = kwargs
-        super().__init__(**self.init_kwargs)
-
+    def __init__(self, reward_func, discount: float, **kwargs):
         self.reward_func = reward_func
+        self.reward_func_curried = partial(reward_func, self)
         self.discount = discount
         self.prev_obs = None
+        super().__init__(**kwargs)
+
+        # TODO (low-priority): refactor to avoid circular imports — don't have state_vals in env
+        from continuous.state_vals import StateVals
         self.state_vals = StateVals(self)
 
         self.env_info = EnvInfoCont(
-            trans_dist=lambda s, a: ReacherEnv.predict_next_state(self, s, a),
+            trans_dist=lambda s, a: ReacherEnv.predict_next_state(s, a),
             discount=self.discount,
             state_space=ReacherEnv.state_space,
             action_space=ReacherEnv.act_space,
@@ -47,7 +50,6 @@ class ReacherEnv(OriginalReacher):
         )
 
     def step(self, *args, **kwargs) -> Tuple:
-        """Fixes a non-json-writable element in the info of the base env."""
         obs, _, done, info = super().step(*args, **kwargs)
         reward = self.reward_func(self, self.prev_obs, args[0], obs)
         self.prev_obs = obs
@@ -56,7 +58,13 @@ class ReacherEnv(OriginalReacher):
     
     @staticmethod
     def predict_next_state(self, state, action):
-        temp_env = OriginalReacher(**self.init_kwargs)
+        # if the arrays aren't already numpy arrays, convert them
+        if not isinstance(state, np.ndarray):
+            state = np.array(state)
+        if not isinstance(action, np.ndarray):
+            action = np.array(action)
+        
+        temp_env = OriginalReacher()
 
         # Set environment to desired state
         temp_env.set_state(state[:temp_env.model.nq],

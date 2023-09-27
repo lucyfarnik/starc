@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 from env import Env
 from _types import Reward, Policy
 
@@ -54,11 +55,11 @@ def optimize(env: Env, reward: Reward, convergence_thresh=1e-5) -> Policy:
 
 # Monte Carlo estimation
 def policy_returns(
-  rewards: list[Reward],
+  rewards: List[Reward],
   policy: Policy,
   env: Env,
   discount_thresh=1e-5,
-) -> list[float]:
+) -> List[float]:
   # beyond this point, the discounts get so heavy that it's not worth computing
   steps_per_episode = round(np.log(discount_thresh) / np.log(env.discount))
 

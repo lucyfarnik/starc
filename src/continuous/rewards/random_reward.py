@@ -20,6 +20,9 @@ class RandomReward(RewardFunc):
                  state: Optional[torch.Tensor], #TODO fix the types
                  action,
                  next_state) -> float:
+        if state is None:
+            return 0
+        
         reward = np.dot(self.s_weights, state) + np.dot(self.a_weights, action) \
             + np.dot(self.s_prime_weights, next_state) + self.bias
 

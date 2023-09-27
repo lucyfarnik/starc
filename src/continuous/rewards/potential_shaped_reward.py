@@ -18,14 +18,14 @@ class PotentialShapedReward(RewardFunc):
         self.potential_bias = np.random.random(1)
 
     def apply_poten(self, state):
-        return np.dot(self.potential_weights, state) + self.potential_biases
+        return np.dot(self.potential_weights, state) + self.potential_bias
 
     def __call__(self,
                  env: ReacherEnv,
                  state: Optional[torch.Tensor], #TODO fix the types
                  action,
                  next_state) -> float:
-        reward = self.ground_truth(state, action, next_state)
+        reward = self.ground_truth(env, state, action, next_state)
         if state is not None:
             reward += env.discount * self.apply_poten(next_state)
             reward -= self.apply_poten(state)
