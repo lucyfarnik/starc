@@ -57,7 +57,7 @@ class ReacherEnv(OriginalReacher):
         return obs, reward, done, info
     
     @staticmethod
-    def predict_next_state(self, state, action):
+    def predict_next_state(state, action):
         # if the arrays aren't already numpy arrays, convert them
         if not isinstance(state, np.ndarray):
             state = np.array(state)
