@@ -1,6 +1,8 @@
 # Continuous experiment
 from multiprocessing import Pool
 import numpy as np
+import os
+import json
 from continuous.distance import canon_and_norm_cont
 from continuous.norm import norm_cont
 from continuous.env import ReacherEnv
@@ -18,6 +20,9 @@ config = {
 
 def continuous_experiment(results_path: str):
   np.random.seed(config['seed'])
+
+  # make sure the temp directory exists
+  os.makedirs(config['temp_dir'], exist_ok=True)
 
   # create the rewards
   ground_truth_env = ReacherEnv(GroundTruthReward(), config['discount'])
@@ -52,6 +57,13 @@ def continuous_experiment(results_path: str):
         results[results_key] = dist
         with open(f"{config['temp_dir']}/{results_key}.txt", 'w') as f:
           f.write(str(dist))
+
+  # save as JSON
+  with open(results_path, 'w') as f:
+    json.dump({'config': config, 'results': results}, f)
+  
+  # remove temp results directory
+  os.system(f"rm -rf {config['temp_dir']}")
 
 if __name__ == '__main__':
   continuous_experiment()
