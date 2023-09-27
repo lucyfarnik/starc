@@ -41,7 +41,7 @@ def find_max(reward: RewardCont,
   # wait for all processes to finish
   for p in processes: p.join()
   
-  return max_sample
+  return max_sample.value
 
 def run_rew_and_add_pow(reward: RewardCont,
                         sample_sum: Value,
@@ -106,5 +106,5 @@ def norm_cont(reward: RewardCont,
   # (V / N * sum)^(1/p)
   # TODO check that including the volume in this way is the "normal" Lp norm
   # TODO (though it's definitely bilipschitz equivalent to it so doesn't really matter)
-  return (domain_volume / n_samples * sample_sum)**(1/ord)
+  return (domain_volume / n_samples * sample_sum.value)**(1/ord)
   

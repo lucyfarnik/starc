@@ -16,8 +16,10 @@ config = {
   'seed': 42,
   'discount': 0.99,
   'temp_dir': 'temp/continuous',
-  'n_canon_samples': 10**6,
-  'n_norm_samples': 10**3,
+  # 'norm_opts': [1, 2, float('inf')],
+  'norm_opts': [2],
+  'n_canon_samples': 2**10,
+  'n_norm_samples': 92*8,
 }
 
 def continuous_experiment(results_path: str):
@@ -28,13 +30,13 @@ def continuous_experiment(results_path: str):
 
   # create the rewards
   ground_truth_env = ReacherEnv(GroundTruthReward(), config['discount'])
-  non_ground_envs = {
-    'potential_shaped': ReacherEnv(PotentialShapedReward(), config['discount']),
-    's_prime': ReacherEnv(SPrimeReward(), config['discount']),
-    'second_peak': ReacherEnv(SecondPeakReward(), config['discount']),
-    'semantically_identical': ReacherEnv(SemanticallyIdenticalReward(), config['discount']),
-    'negative_ground': ReacherEnv(NegativeGroundReward(), config['discount']),
-    'random': ReacherEnv(RandomReward(), config['discount']),
+  non_ground_rews = {
+    'potential_shaped': PotentialShapedReward(),
+    's_prime': SPrimeReward(),
+    'second_peak': SecondPeakReward(),
+    'semantically_identical': SemanticallyIdenticalReward(),
+    'negative_ground': NegativeGroundReward(),
+    'random': RandomReward(),
   }
 
   results: dict[str, float] = {}
@@ -42,11 +44,14 @@ def continuous_experiment(results_path: str):
   # loop over all rewards and compute their distance from the ground truth
   standardized_gt = canon_and_norm_cont(ground_truth_env.reward_func_curried,
                                         ground_truth_env.env_info,
+                                        config['norm_opts'],
                                         config['n_canon_samples'],
                                         config['n_norm_samples'])
-  for r2_name, e2 in non_ground_envs.items():
+  for r2_name, r2 in non_ground_rews.items():
+    e2 = ReacherEnv(r2, config['discount'])
     standardized_r2 = canon_and_norm_cont(e2.reward_func_curried,
                                           e2.env_info,
+                                          config['norm_opts'],
                                           config['n_canon_samples'],
                                           config['n_norm_samples'])
 

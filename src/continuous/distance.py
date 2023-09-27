@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Union, Dict
 from continuous.canon.val import val_canon_cont
 from continuous.canon.epic import epic_canon_cont
 from continuous.canon.dard import dard_canon_cont
@@ -11,11 +11,11 @@ canon_funcs = {
     'EPIC': epic_canon_cont,
     'DARD': dard_canon_cont,
 }
-norm_opts = [1, 2, float('inf'), 'weighted_1', 'weighted_2', 'weighted_inf']
 
 @timed
 def canon_and_norm_cont(reward: RewardCont,
                         env_info: EnvInfoCont,
+                        norm_opts: Union[int, float] = [1, 2, float('inf')],
                         n_canon_samples: int = 10**6,
                         n_norm_samples: int = 10**3) -> Dict[str, RewardCont]:
     """
