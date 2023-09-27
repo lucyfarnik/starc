@@ -12,6 +12,8 @@ class ReacherEnv(OriginalReacher):
     Args:
         reward_func: from (self, state, action, next_state) -> reward (float)
     """
+    original_env_instance = OriginalReacher()
+
     state_space: Space = [
         (-1, 1), # cosine of the angle of the first arm
         (-1, 1), # cosine of the angle of the second arm
@@ -64,13 +66,13 @@ class ReacherEnv(OriginalReacher):
         if not isinstance(action, np.ndarray):
             action = np.array(action)
         
-        temp_env = OriginalReacher()
+        env = ReacherEnv.original_env_instance
 
         # Set environment to desired state
-        temp_env.set_state(state[:temp_env.model.nq],
-                           state[temp_env.model.nq:temp_env.model.nq + temp_env.model.nv])
+        env.set_state(state[:env.model.nq],
+                      state[env.model.nq : env.model.nq + env.model.nv])
         
         # Take the desired action
-        next_state, _, _, _ = temp_env.step(action)
+        next_state, _, _, _ = env.step(action)
         
         return next_state

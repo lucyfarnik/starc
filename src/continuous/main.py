@@ -16,6 +16,8 @@ config = {
   'seed': 42,
   'discount': 0.99,
   'temp_dir': 'temp/continuous',
+  'n_canon_samples': 10**6,
+  'n_norm_samples': 10**3,
 }
 
 def continuous_experiment(results_path: str):
@@ -40,7 +42,7 @@ def continuous_experiment(results_path: str):
   # loop over all rewards and compute their distance from the ground truth
   standardized_gt = canon_and_norm_cont(ground_truth_env.reward_func_curried,
                                         ground_truth_env.env_info)
-  for r2_name, e2 in non_ground_envs.items(): # TODO parallelize as much as possible
+  for r2_name, e2 in non_ground_envs.items():
     standardized_r2 = canon_and_norm_cont(e2.reward_func_curried, e2.env_info)
 
     for cn_name in standardized_gt:
