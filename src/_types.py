@@ -15,7 +15,9 @@ Space = List[Tuple[float, float]] # list of (min, max); inclusive on both sides
 @dataclass
 class EnvInfoCont():
   trans_dist: TransCont
+  trans_dist_deterministic: bool
   discount: float
   state_space: Space
   action_space: Space
   state_vals: StateValCont
+  state_vals_deterministic: bool

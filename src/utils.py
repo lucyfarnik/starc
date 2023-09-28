@@ -1,7 +1,7 @@
 import numpy as np
-from functools import wraps
+from functools import wraps, partial
 import time
-from _types import Space
+from _types import Space, RewardCont
 
 # softmax along last dimension
 def softmax(arr: np.ndarray) -> np.ndarray:
@@ -24,3 +24,9 @@ def timed(f):
 # sampling a state/action space (ie sampling a list of intervals)
 def sample_space(space: Space) -> float:
   return [np.random.uniform(*interval) for interval in space]
+
+def _reward_diff(r1: RewardCont, r2: RewardCont, *args):
+  return r1(*args) - r2(*args)
+
+def get_reward_diff(r1: RewardCont, r2: RewardCont):
+  return partial(_reward_diff, r1, r2)

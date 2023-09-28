@@ -44,11 +44,13 @@ class ReacherEnv(OriginalReacher):
         self.state_vals = StateVals(self)
 
         self.env_info = EnvInfoCont(
-            trans_dist=lambda s, a: ReacherEnv.predict_next_state(s, a),
+            trans_dist=ReacherEnv.predict_next_state,
+            trans_dist_deterministic=True,
             discount=self.discount,
             state_space=ReacherEnv.state_space,
             action_space=ReacherEnv.act_space,
             state_vals=self.state_vals,
+            state_vals_deterministic=True,
         )
 
     def step(self, *args, **kwargs) -> Tuple:

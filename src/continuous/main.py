@@ -11,6 +11,7 @@ from continuous.rewards import (
     RandomReward, SPrimeReward, SecondPeakReward,
     SemanticallyIdenticalReward
 )
+from utils import get_reward_diff
 
 config = {
   'seed': 42,
@@ -18,6 +19,8 @@ config = {
   'temp_dir': 'temp/continuous',
   # 'norm_opts': [1, 2, float('inf')],
   'norm_opts': [2],
+  # 'dist_opts': [1, 2, float('inf')],
+  'dist_opts': [2],
   'n_canon_samples': 2**10,
   'n_norm_samples': 92*8,
 }
@@ -27,6 +30,9 @@ def continuous_experiment(results_path: str):
 
   # make sure the temp directory exists
   os.makedirs(config['temp_dir'], exist_ok=True)
+  # dump the config into it
+  with open(f"{config['temp_dir']}/config.json", 'w') as f:
+    json.dump(config, f)
 
   # create the rewards
   ground_truth_env = ReacherEnv(GroundTruthReward(), config['discount'])
@@ -59,10 +65,8 @@ def continuous_experiment(results_path: str):
       cn_gt = standardized_gt[cn_name]
       cn_r2 = standardized_r2[cn_name]
 
-      for d_ord in [1, 2, float('inf')]:
-        diff_func = lambda *args: cn_gt(*args) - cn_r2(*args)
-
-        dist = norm_cont(diff_func,
+      for d_ord in config['dist_opts']:
+        dist = norm_cont(get_reward_diff(cn_gt, cn_r2),
                          ReacherEnv.state_space,
                          ReacherEnv.act_space,
                          d_ord,
