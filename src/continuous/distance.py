@@ -37,6 +37,7 @@ def canon_and_norm_cont(reward: RewardCont,
     for c_name, val in can_r.items():
         for n_ord in norm_opts:
             norm_val = norm_cont(val,
+                                 env_info.trans_dist,
                                  env_info.state_space,
                                  env_info.action_space,
                                  n_ord,

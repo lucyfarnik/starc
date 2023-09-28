@@ -22,7 +22,7 @@ config = {
   # 'dist_opts': [1, 2, float('inf')],
   'dist_opts': [2],
   'n_canon_samples': 2**10,
-  'n_norm_samples': 92*8,
+  'n_norm_samples': 96*8,
 }
 
 def continuous_experiment(results_path: str):
