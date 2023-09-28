@@ -22,7 +22,7 @@ class SecondPeakReward(RewardFunc):
         # pick a random point in the space that's not too close to the target
         self.target_position = env.get_body_com("target")[:2]
         self.second_peak = sample_space(ReacherEnv.state_space[4:6])
-        while np.linalg.norm(self.second_peak - self.target_position) < 1:
+        while np.linalg.norm(self.second_peak - self.target_position) < 0.5:
             self.second_peak = sample_space(ReacherEnv.state_space[4:6])
          
     def __call__(self,

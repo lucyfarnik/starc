@@ -27,7 +27,7 @@ def _dard_canonicalized(reward: RewardCont,
                     - reward(s, A, S_prime)
                     - env_info.discount * reward(S_prime, A, S_double))
 
-  return np.mean(samples)
+  return np.mean(samples).item()
 
 def dard_canon_cont(reward: RewardCont,
                     env_info: EnvInfoCont,

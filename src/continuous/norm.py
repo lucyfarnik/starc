@@ -1,17 +1,21 @@
-from _types import RewardCont, Space
+from _types import RewardCont, TransCont, Space
 from typing import Union
 from utils import timed, sample_space
 from joblib import Parallel, delayed
 from joblib.externals.loky.process_executor import BrokenProcessPool
 
-def sample_reward_worker(reward: RewardCont, state_space: Space, action_space: Space):
+def sample_reward_worker(reward: RewardCont,
+                         trans_dist: TransCont,
+                         state_space: Space,
+                         action_space: Space):
   s = sample_space(state_space)
   a = sample_space(action_space)
-  s_prime = sample_space(state_space)
+  s_prime = trans_dist(s, a) #!!!!!!
   return reward(s, a, s_prime)
 
-@timed
+# @timed
 def norm_cont(reward: RewardCont,
+              trans_dist: TransCont,
               state_space: Space,
               action_space: Space,
               ord: Union[int, float, str] = 2,
@@ -21,7 +25,7 @@ def norm_cont(reward: RewardCont,
 
   try:
     results = Parallel(n_jobs=-1, backend='threading')(
-      delayed(sample_reward_worker)(reward, state_space, action_space)
+      delayed(sample_reward_worker)(reward, trans_dist, state_space, action_space)
       for _ in range(n_samples))
   except BrokenProcessPool:
     print("Failed to parallelize due to serialization issues.")
@@ -32,7 +36,7 @@ def norm_cont(reward: RewardCont,
   # if is_weighted: sample_val *= env_info.trans_prob(s, a, s_prime) # weighted norms
 
   if ord == float('inf'):
-    return max(results)
+    return max(results) 
 
   sample_sum = sum([r**ord for r in results])
 

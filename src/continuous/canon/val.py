@@ -12,9 +12,11 @@ def _val_canonicalized(reward: RewardCont,
                        s_prime: float) -> float:
   if env_info.trans_dist_deterministic and env_info.state_vals_deterministic:
     S_prime = env_info.trans_dist(s, a)
-    return reward(s, a, S_prime) - \
-            env_info.state_vals(s) + \
-            env_info.discount * env_info.state_vals(S_prime)
+    result = reward(s, a, S_prime) - \
+              env_info.state_vals(s) + \
+              env_info.discount * env_info.state_vals(S_prime)
+    if hasattr(result, 'item'): return result.item()
+    return result
   
   samples = []
   for _ in range(n_samples):
@@ -25,7 +27,7 @@ def _val_canonicalized(reward: RewardCont,
                     - env_info.state_vals(s)
                     + env_info.discount * env_info.state_vals(S_prime))
 
-  return np.mean(samples)
+  return np.mean(samples).item()
 
 def val_canon_cont(reward: RewardCont,
                    env_info: EnvInfoCont,

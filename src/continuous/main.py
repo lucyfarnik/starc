@@ -67,6 +67,7 @@ def continuous_experiment(results_path: str):
 
       for d_ord in config['dist_opts']:
         dist = norm_cont(get_reward_diff(cn_gt, cn_r2),
+                         ReacherEnv.predict_next_state,
                          ReacherEnv.state_space,
                          ReacherEnv.act_space,
                          d_ord,

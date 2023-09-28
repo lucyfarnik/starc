@@ -22,7 +22,7 @@ def _epic_canonicalized(reward: RewardCont,
                     - reward(s, A, S_prime)
                     - env_info.discount * reward(S, A, S_prime))
 
-  return np.mean(samples)
+  return np.mean(samples).item()
       
 def epic_canon_cont(reward: RewardCont,
                     env_info: EnvInfoCont,

@@ -4,6 +4,7 @@ import torch
 from continuous.env import ReacherEnv
 from continuous.rewards.reward_func import RewardFunc
 from continuous.rewards.ground_truth_reward import GroundTruthReward
+from continuous.rewards.random_reward import RandomReward
 from continuous.env import ReacherEnv
 
 class SPrimeReward(RewardFunc):
@@ -17,6 +18,7 @@ class SPrimeReward(RewardFunc):
     def __init__(self):
         super().__init__()
         self.ground_truth = GroundTruthReward()
+        self.random_reward = RandomReward()
     
     def __call__(self,
                  env: ReacherEnv,
@@ -28,4 +30,4 @@ class SPrimeReward(RewardFunc):
                                         rtol=1e-3, atol=1e-3):
             return self.ground_truth(env, state, action, next_state)
         
-        return 1e6
+        return self.random_reward(env, state, action, next_state)

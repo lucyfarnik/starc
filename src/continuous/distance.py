@@ -14,18 +14,11 @@ canon_funcs = {
 }
 
 def _normalized_reward(canonicalized: RewardCont,
-                       state_space: Space,
-                       action_space: Space,
-                       n_ord: Union[int, float],
-                       n_norm_samples: int,
+                       norm_val: float,
                        s: float,
                        a: float,
                        s_prime: float) -> float:
-    return canonicalized(s, a, s_prime) / norm_cont(canonicalized,
-                                            state_space,
-                                            action_space,
-                                            n_ord,
-                                            n_norm_samples)
+    return canonicalized(s, a, s_prime) / norm_val
 
 # @timed
 def canon_and_norm_cont(reward: RewardCont,
@@ -43,12 +36,12 @@ def canon_and_norm_cont(reward: RewardCont,
     norm_r = {}
     for c_name, val in can_r.items():
         for n_ord in norm_opts:
-            normalized = partial(_normalized_reward,
-                                 val,
+            norm_val = norm_cont(val,
                                  env_info.state_space,
                                  env_info.action_space,
                                  n_ord,
                                  n_norm_samples)
+            normalized = partial(_normalized_reward, val, norm_val)
                                                       
             norm_r[f'{c_name}-{n_ord}'] = normalized
     
