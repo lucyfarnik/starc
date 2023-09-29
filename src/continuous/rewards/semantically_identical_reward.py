@@ -24,4 +24,7 @@ class SemanticallyIdenticalReward(RewardFunc):
         gauss_val = np.exp(-((x-x0)**2/(2*self.std_x**2) + (y-y0)**2/(2*self.std_y**2)))
 
         # quantize the Gaussian
-        return np.round(gauss_val*10)/10
+        reward = np.round(gauss_val*100)/100
+
+        if hasattr(reward, 'item'): return reward.item()
+        return reward

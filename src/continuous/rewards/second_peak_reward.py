@@ -42,4 +42,5 @@ class SecondPeakReward(RewardFunc):
         reward = self.ground_truth(env, state, action, next_state)
         reward += -0.2*np.linalg.norm(self.second_peak - env.get_body_com("fingertip")[:2])
 
+        if hasattr(reward, 'item'): return reward.item()
         return reward

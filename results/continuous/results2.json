@@ -1,0 +1,8 @@
+{"config": {
+    "seed": 42, "discount": 0.99, "temp_dir": "temp/continuous", "canon_func_keys": ["VAL"],
+    "norm_opts": [2], "dist_opts": [2], "n_canon_samples": 1024, "n_norm_samples": 100000,
+    "n_episodes_dqn": 5000},
+"results": {"potential_shaped-VAL-2-2": 0.896877586171113,
+            "second_peak-VAL-2-2": 1.2570055835092142,
+            "negative_ground-VAL-2-2": 1.7059228888169617,
+            "random-VAL-2-2": 1.377798647573624}}

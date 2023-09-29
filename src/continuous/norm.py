@@ -13,7 +13,7 @@ def sample_reward_worker(reward: RewardCont,
   s_prime = trans_dist(s, a) #!!!!!!
   return reward(s, a, s_prime)
 
-# @timed
+@timed
 def norm_cont(reward: RewardCont,
               trans_dist: TransCont,
               state_space: Space,
@@ -40,16 +40,19 @@ def norm_cont(reward: RewardCont,
 
   sample_sum = sum([r**ord for r in results])
 
-  state_space_volume = 1
-  for interval in state_space:
-    if interval[0] == interval[1]: # prevents division by zero later on
-      continue
-    state_space_volume *= interval[1] - interval[0]
-  action_space_volume = 1
-  for interval in action_space:
-    if interval[0] == interval[1]: # prevents division by zero later on
-      continue
-    action_space_volume *= interval[1] - interval[0]
-  domain_volume = (state_space_volume ** 2) * action_space_volume
+  # state_space_volume = 1
+  # for interval in state_space:
+  #   if interval[0] == interval[1]: # prevents division by zero later on
+  #     continue
+  #   state_space_volume *= interval[1] - interval[0]
+  # action_space_volume = 1
+  # for interval in action_space:
+  #   if interval[0] == interval[1]: # prevents division by zero later on
+  #     continue
+  #   action_space_volume *= interval[1] - interval[0]
+  # domain_volume = (state_space_volume ** 2) * action_space_volume
 
-  return (domain_volume / n_samples * sample_sum)**(1/ord)
+  # domain_volume = 1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  # return (domain_volume / n_samples * sample_sum)**(1/ord)
+  return (sample_sum / n_samples)**(1/ord)

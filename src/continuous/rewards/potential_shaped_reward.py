@@ -30,4 +30,5 @@ class PotentialShapedReward(RewardFunc):
             reward += env.discount * self.apply_poten(next_state)
             reward -= self.apply_poten(state)
 
+        if hasattr(reward, 'item'): return reward.item()
         return reward

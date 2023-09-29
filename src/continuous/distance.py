@@ -1,4 +1,4 @@
-from typing import Union, Dict
+from typing import List, Union, Dict
 from functools import partial
 from continuous.canon.val import val_canon_cont
 from continuous.canon.epic import epic_canon_cont
@@ -18,11 +18,14 @@ def _normalized_reward(canonicalized: RewardCont,
                        s: float,
                        a: float,
                        s_prime: float) -> float:
+    if norm_val == 0:
+        return canonicalized(s, a, s_prime)
     return canonicalized(s, a, s_prime) / norm_val
 
 # @timed
 def canon_and_norm_cont(reward: RewardCont,
                         env_info: EnvInfoCont,
+                        canon_func_keys: List[str] = ['VAL', 'EPIC', 'DARD'],
                         norm_opts: Union[int, float] = [1, 2, float('inf')],
                         n_canon_samples: int = 10**6,
                         n_norm_samples: int = 10**3) -> Dict[str, RewardCont]:
@@ -30,9 +33,9 @@ def canon_and_norm_cont(reward: RewardCont,
     Returns a dictionary of all the possible canonicalizations and normalizations
     (lists of possible options are defined in as constants in this file).
     """
-    can_r = {c_name: c_func(reward, env_info, n_canon_samples)
-            for c_name, c_func in canon_funcs.items()}
-    
+    can_r = {c_name: canon_funcs[c_name](reward, env_info, n_canon_samples)
+            for c_name in canon_func_keys}
+   
     norm_r = {}
     for c_name, val in can_r.items():
         for n_ord in norm_opts:

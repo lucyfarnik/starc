@@ -10,19 +10,19 @@ def _epic_canonicalized(reward: RewardCont,
                         s: float,
                         a: float,
                         s_prime: float) -> float:
-  samples = []
+  samples_sum = 0
   for _ in range(n_samples):
     # sample S, A, S' from uniform distributions
     S = sample_space(env_info.state_space)
     A = sample_space(env_info.action_space)
     S_prime = sample_space(env_info.state_space)
 
-    samples.append(reward(s, a, s_prime)
-                    + env_info.discount * reward(s_prime, A, S_prime)
-                    - reward(s, A, S_prime)
-                    - env_info.discount * reward(S, A, S_prime))
+    samples_sum += reward(s, a, s_prime) + \
+                    env_info.discount * reward(s_prime, A, S_prime) - \
+                    reward(s, A, S_prime) - \
+                    env_info.discount * reward(S, A, S_prime)
 
-  return np.mean(samples).item()
+  return samples_sum / n_samples
       
 def epic_canon_cont(reward: RewardCont,
                     env_info: EnvInfoCont,

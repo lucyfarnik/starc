@@ -32,7 +32,7 @@ class ReacherEnv(OriginalReacher):
         (-1, 1), # Torque applied at the second hinge (connecting the two links)
     ]
 
-    def __init__(self, reward_func, discount: float, **kwargs):
+    def __init__(self, reward_func, discount: float, n_episodes_sarsa: int = 10000, **kwargs):
         self.reward_func = reward_func
         self.reward_func_curried = partial(reward_func, self)
         self.discount = discount
@@ -41,7 +41,9 @@ class ReacherEnv(OriginalReacher):
 
         # TODO (low-priority): refactor to avoid circular imports — don't have state_vals in env
         from continuous.state_vals import StateVals
-        self.state_vals = StateVals(self)
+        self.state_vals = StateVals(self,
+                                    self.reward_func.__class__.__name__,
+                                    n_episodes_sarsa)
 
         self.env_info = EnvInfoCont(
             trans_dist=ReacherEnv.predict_next_state,

@@ -26,4 +26,5 @@ class RandomReward(RewardFunc):
         reward = np.dot(self.s_weights, state) + np.dot(self.a_weights, action) \
             + np.dot(self.s_prime_weights, next_state) + self.bias
 
+        if hasattr(reward, 'item'): return reward.item()
         return reward

@@ -15,19 +15,19 @@ def _dard_canonicalized(reward: RewardCont,
   else:
     n_samples_adjusted = n_samples
   
-  samples = []
+  samples_sum = 0
   for _ in range(n_samples_adjusted):
     # sample S, A, S' from uniform distributions
     A = sample_space(env_info.action_space)
     S_prime = env_info.trans_dist(s, A)
     S_double = env_info.trans_dist(s_prime, A)
 
-    samples.append(reward(s, a, s_prime)
-                    + env_info.discount * reward(s_prime, A, S_double)
-                    - reward(s, A, S_prime)
-                    - env_info.discount * reward(S_prime, A, S_double))
+    samples_sum += reward(s, a, s_prime) + \
+                    env_info.discount * reward(s_prime, A, S_double) - \
+                    reward(s, A, S_prime) - \
+                    env_info.discount * reward(S_prime, A, S_double)
 
-  return np.mean(samples).item()
+  return samples_sum / n_samples_adjusted
 
 def dard_canon_cont(reward: RewardCont,
                     env_info: EnvInfoCont,

@@ -18,16 +18,18 @@ def _val_canonicalized(reward: RewardCont,
     if hasattr(result, 'item'): return result.item()
     return result
   
-  samples = []
+  samples_sum = 0
   for _ in range(n_samples):
     # sample S_prime from trans_dist
     S_prime = env_info.trans_dist(s, a)
 
-    samples.append(reward(s, a, S_prime)
-                    - env_info.state_vals(s)
-                    + env_info.discount * env_info.state_vals(S_prime))
+    samples_sum += reward(s, a, S_prime) - \
+                    env_info.state_vals(s) + \
+                    env_info.discount * env_info.state_vals(S_prime)
 
-  return np.mean(samples).item()
+  result = samples_sum / n_samples
+  if hasattr(result, 'item'): return result.item()
+  return result
 
 def val_canon_cont(reward: RewardCont,
                    env_info: EnvInfoCont,

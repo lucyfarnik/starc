@@ -18,6 +18,7 @@ class GroundTruthReward(RewardFunc):
         reward_ctrl = -np.square(action).sum()
         reward = reward_dist + reward_ctrl
 
+        if hasattr(reward, 'item'): return reward.item()
         return reward
 
 # class GroundTruthReward(RewardModel):

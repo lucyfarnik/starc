@@ -17,12 +17,15 @@ config = {
   'seed': 42,
   'discount': 0.99,
   'temp_dir': 'temp/continuous',
+  # 'canon_func_keys': ['VAL', 'EPIC', 'DARD'],
+  'canon_func_keys': ['VAL'],
   # 'norm_opts': [1, 2, float('inf')],
   'norm_opts': [2],
   # 'dist_opts': [1, 2, float('inf')],
   'dist_opts': [2],
-  'n_canon_samples': 2**10,
-  'n_norm_samples': 96*8,
+  'n_canon_samples': 2**5,
+  'n_norm_samples': 96*1,
+  'n_episodes_sarsa': 10000,
 }
 
 def continuous_experiment(results_path: str):
@@ -35,7 +38,9 @@ def continuous_experiment(results_path: str):
     json.dump(config, f)
 
   # create the rewards
-  ground_truth_env = ReacherEnv(GroundTruthReward(), config['discount'])
+  ground_truth_env = ReacherEnv(GroundTruthReward(),
+                                config['discount'],
+                                config['n_episodes_sarsa'])
   non_ground_rews = {
     'potential_shaped': PotentialShapedReward(),
     's_prime': SPrimeReward(),
@@ -50,13 +55,15 @@ def continuous_experiment(results_path: str):
   # loop over all rewards and compute their distance from the ground truth
   standardized_gt = canon_and_norm_cont(ground_truth_env.reward_func_curried,
                                         ground_truth_env.env_info,
+                                        config['canon_func_keys'],
                                         config['norm_opts'],
                                         config['n_canon_samples'],
                                         config['n_norm_samples'])
   for r2_name, r2 in non_ground_rews.items():
-    e2 = ReacherEnv(r2, config['discount'])
+    e2 = ReacherEnv(r2, config['discount'], config['n_episodes_sarsa'])
     standardized_r2 = canon_and_norm_cont(e2.reward_func_curried,
                                           e2.env_info,
+                                          config['canon_func_keys'],
                                           config['norm_opts'],
                                           config['n_canon_samples'],
                                           config['n_norm_samples'])
