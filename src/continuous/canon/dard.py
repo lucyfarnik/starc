@@ -10,6 +10,10 @@ def _dard_canonicalized(reward: RewardCont,
                         s: float,
                         a: float,
                         s_prime: float) -> float:
+  """
+    Exectues the DARD canonicalized version of the reward function on a specific
+    transition and returns the reward value
+  """
   if env_info.trans_dist_deterministic:
     n_samples_adjusted = n_samples // 10 # instead of 22 dimensions, we only sample 2
   else:
@@ -33,6 +37,8 @@ def dard_canon_cont(reward: RewardCont,
                     env_info: EnvInfoCont,
                     n_samples: int = 10**6) -> RewardCont:
   """
+    Returns the DARD canonicalized reward function
+
     C(R)(s,a,s') = R(s,a,s') + E[\gamma R(s',A,S'') - R(s,A,S') - \gamma R(S',A,S'')]
     A \sim D_a (assume uniform)
     S' \sim T(S'|s,A)

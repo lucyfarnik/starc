@@ -1,16 +1,14 @@
-# Reward distance
-The idea of these experiments is to compare different EPIC-like
-reward function distances and see how well they correlate with each other,
-as well as with regret from rolling out the policy.
+# STARC reward distances
+These experiments empirically examine different ways of measuring distances
+between pairs of reward functions and compare their performance. The first version
+of the paper can be found [here](https://arxiv.org/abs/2309.15257).
 
-## Intended audience
-This repo is meant for my co-authors.
 
 ## Repo structure
 All the source code is located in the `/src` directory. The files that execute
-the individual experiments is located in the `/src/experiments` subdirectory,
+the individual experiments are located in the `/src/experiments` subdirectory,
 with `/src/__main__.py` being a convenient way to execute them from the command line.
 
-## Help
-If you have any questions, please get in touch with me. If something in this
-repo looks stupid, that's probably because it is.
+There is one exception to this structure — all the experiments involving continuous
+environments are located in `/src/continuous`. These are almost entirely disconnected
+from the rest of the repo because the data structures are completely different.

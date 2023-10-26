@@ -10,6 +10,10 @@ def _val_canonicalized(reward: RewardCont,
                        s: float,
                        a: float,
                        s_prime: float) -> float:
+  """
+    Executes the STARC-VAL canonicalized version of the reward function and
+    returns its value for the transition
+  """
   if env_info.trans_dist_deterministic and env_info.state_vals_deterministic:
     S_prime = env_info.trans_dist(s, a)
     result = reward(s, a, S_prime) - \
@@ -35,6 +39,8 @@ def val_canon_cont(reward: RewardCont,
                    env_info: EnvInfoCont,
                    n_samples: int = 10**6) -> RewardCont:
   """
+    Returns the STARC-VAL canonicalized reward function
+
     C(R)(s,a,s') = E[R(s,a,S') + gamma*V^\pi(S') - V^\pi(s)]
     S' ~ T(S' | s,a)
   """

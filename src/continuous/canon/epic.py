@@ -10,6 +10,10 @@ def _epic_canonicalized(reward: RewardCont,
                         s: float,
                         a: float,
                         s_prime: float) -> float:
+  """
+    Executes the EPIC canonicalized version of the reward function and returns
+    its value for the transition
+  """
   samples_sum = 0
   for _ in range(n_samples):
     # sample S, A, S' from uniform distributions
@@ -28,6 +32,8 @@ def epic_canon_cont(reward: RewardCont,
                     env_info: EnvInfoCont,
                     n_samples: int = 10**6) -> RewardCont:
   """
+    Returns the EPIC canonicalized reward function
+
     C(R)(s,a,s') = R(s,a,s') + E[\gamma R(s',A,S') - R(s,A,S') - \gamma R(S,A,S')]
     S,S' \sim D_s (assume uniform)
     A \sim D_a (assume uniform)

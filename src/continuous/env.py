@@ -45,6 +45,7 @@ class ReacherEnv(OriginalReacher):
                                     self.reward_func.__class__.__name__,
                                     n_episodes_sarsa)
 
+        # utility class allowing us to pass around the information about the env easily
         self.env_info = EnvInfoCont(
             trans_dist=ReacherEnv.predict_next_state,
             trans_dist_deterministic=True,
